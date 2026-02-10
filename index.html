@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlobeMate — Your Smart Travel Assistant</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">
+        <i class="fas fa-globe-americas"></i>
+        <span>GlobeMate</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#trip-planner" data-section="trip-planner"><i class="fas fa-route"></i> Trip Planner</a></li>
+        <li><a href="#country-info" data-section="country-info"><i class="fas fa-flag"></i> Countries</a></li>
+        <li><a href="#safety" data-section="safety"><i class="fas fa-shield-alt"></i> Safety</a></li>
+        <li><a href="#packing" data-section="packing"><i class="fas fa-suitcase-rolling"></i> Packing</a></li>
+        <li><a href="#currency" data-section="currency"><i class="fas fa-coins"></i> Currency</a></li>
+        <li><a href="#documents" data-section="documents"><i class="fas fa-folder-open"></i> Documents</a></li>
+        <li><a href="#maps" data-section="maps"><i class="fas fa-map-marked-alt"></i> Maps</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Travel Smarter with <span class="gradient-text">GlobeMate</span>
+      </h1>
+      <p class="hero-subtitle">Your all-in-one travel assistant — plan trips, check visas, convert currency, pack smart, and explore the world with confidence.</p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">195+</span>
+          <span class="stat-label">Countries</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">160+</span>
+          <span class="stat-label">Currencies</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">7</span>
+          <span class="stat-label">Smart Tools</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a href="#trip-planner" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Start Planning</a>
+        <a href="#country-info" class="btn btn-outline btn-lg"><i class="fas fa-search"></i> Explore Countries</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- ============ TRIP PLANNER ============ -->
+  <section class="section" id="trip-planner">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-route"></i> Trip Planner</span>
+        <h2 class="section-title">Plan Your Perfect Trip</h2>
+        <p class="section-desc">Organize your itinerary, set budgets, and keep all your trip details in one place.</p>
+      </div>
+
+      <div class="trip-planner-layout">
+        <!-- Trip Form -->
+        <div class="card trip-form-card">
+          <h3 class="card-title"><i class="fas fa-plus-circle"></i> Create New Trip</h3>
+          <form id="tripForm" class="trip-form">
+            <div class="form-group">
+              <label for="tripName"><i class="fas fa-tag"></i> Trip Name</label>
+              <input type="text" id="tripName" placeholder="e.g., European Adventure" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tripDest"><i class="fas fa-map-pin"></i> Destination</label>
+                <input type="text" id="tripDest" placeholder="e.g., Paris, France" required>
+              </div>
+              <div class="form-group">
+                <label for="tripBudget"><i class="fas fa-wallet"></i> Budget (USD)</label>
+                <input type="number" id="tripBudget" placeholder="e.g., 3000" min="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tripStart"><i class="fas fa-calendar"></i> Start Date</label>
+                <input type="date" id="tripStart" required>
+              </div>
+              <div class="form-group">
+                <label for="tripEnd"><i class="fas fa-calendar-check"></i> End Date</label>
+                <input type="date" id="tripEnd" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="tripNotes"><i class="fas fa-sticky-note"></i> Notes</label>
+              <textarea id="tripNotes" rows="3" placeholder="Any special plans or notes..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Save Trip</button>
+          </form>
+        </div>
+
+        <!-- Itinerary -->
+        <div class="card itinerary-card">
+          <h3 class="card-title"><i class="fas fa-list-ol"></i> Itinerary</h3>
+          <div id="itinerarySection" class="itinerary-section">
+            <div class="empty-state" id="itineraryEmpty">
+              <i class="fas fa-map-signs"></i>
+              <p>Create a trip to start adding activities</p>
+            </div>
+            <div id="itineraryBuilder" class="hidden">
+              <div class="itinerary-add">
+                <input type="text" id="activityInput" placeholder="Add an activity...">
+                <input type="time" id="activityTime">
+                <button class="btn btn-sm btn-primary" id="addActivityBtn"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul id="activityList" class="activity-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Saved Trips -->
+        <div class="card saved-trips-card">
+          <h3 class="card-title"><i class="fas fa-suitcase"></i> My Trips</h3>
+          <div id="savedTrips" class="saved-trips">
+            <div class="empty-state">
+              <i class="fas fa-plane-departure"></i>
+              <p>No trips yet. Create your first adventure!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COUNTRY INFO & VISA ============ -->
+  <section class="section section-alt" id="country-info">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-flag"></i> Country Explorer</span>
+        <h2 class="section-title">Country Info & Visa Checker</h2>
+        <p class="section-desc">Get essential information about any country and check visa eligibility.</p>
+      </div>
+
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="countrySearch" placeholder="Search for a country... (e.g., Japan, Brazil, Germany)" autocomplete="off">
+        <div id="countrySuggestions" class="suggestions-dropdown hidden"></div>
+      </div>
+
+      <div id="countryResult" class="country-result hidden">
+        <div class="country-header-card">
+          <div class="country-flag-wrap">
+            <img id="countryFlag" src="" alt="Flag">
+          </div>
+          <div class="country-title-info">
+            <h3 id="countryName"></h3>
+            <p id="countryOfficialName" class="text-muted"></p>
+          </div>
+        </div>
+        <div class="country-grid">
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-city"></i></div>
+            <div class="info-content">
+              <span class="info-label">Capital</span>
+              <span class="info-value" id="countryCapital"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-globe"></i></div>
+            <div class="info-content">
+              <span class="info-label">Region</span>
+              <span class="info-value" id="countryRegion"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-users"></i></div>
+            <div class="info-content">
+              <span class="info-label">Population</span>
+              <span class="info-value" id="countryPopulation"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-language"></i></div>
+            <div class="info-content">
+              <span class="info-label">Languages</span>
+              <span class="info-value" id="countryLanguages"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="info-content">
+              <span class="info-label">Currency</span>
+              <span class="info-value" id="countryCurrency"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-clock"></i></div>
+            <div class="info-content">
+              <span class="info-label">Timezone</span>
+              <span class="info-value" id="countryTimezone"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-phone"></i></div>
+            <div class="info-content">
+              <span class="info-label">Calling Code</span>
+              <span class="info-value" id="countryCallingCode"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-car"></i></div>
+            <div class="info-content">
+              <span class="info-label">Driving Side</span>
+              <span class="info-value" id="countryDriving"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visa Checker -->
+        <div class="visa-checker card">
+          <h3 class="card-title"><i class="fas fa-passport"></i> Visa Eligibility Checker</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="passportCountry"><i class="fas fa-id-card"></i> Your Passport</label>
+              <select id="passportCountry">
+                <option value="">Select your passport country</option>
+              </select>
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;">
+              <button class="btn btn-primary" id="checkVisaBtn"><i class="fas fa-search"></i> Check Visa</button>
+            </div>
+          </div>
+          <div id="visaResult" class="visa-result hidden"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SAFETY INDEX ============ -->
+  <section class="section" id="safety">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-shield-alt"></i> Safety Center</span>
+        <h2 class="section-title">Safety Index & Emergency Contacts</h2>
+        <p class="section-desc">Stay informed with safety ratings and emergency numbers for your destination.</p>
+      </div>
+
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="safetySearch" placeholder="Enter a country name... (e.g., Thailand, Mexico)" autocomplete="off">
+        <button class="btn btn-primary" id="safetySearchBtn"><i class="fas fa-shield-alt"></i> Check Safety</button>
+      </div>
+
+      <div id="safetyResult" class="hidden">
+        <div class="safety-overview">
+          <div class="safety-score-card card">
+            <h3><i class="fas fa-tachometer-alt"></i> Safety Score</h3>
+            <div class="safety-gauge">
+              <div class="gauge-circle" id="safetyGauge">
+                <span class="gauge-value" id="safetyScore">--</span>
+                <span class="gauge-label">/ 100</span>
+              </div>
+            </div>
+            <p class="safety-level" id="safetyLevel"></p>
+          </div>
+
+          <div class="emergency-card card">
+            <h3><i class="fas fa-phone-alt"></i> Emergency Numbers</h3>
+            <div class="emergency-numbers">
+              <div class="emergency-item">
+                <i class="fas fa-ambulance"></i>
+                <span class="emergency-label">Ambulance</span>
+                <span class="emergency-number" id="emergencyAmbulance">--</span>
+              </div>
+              <div class="emergency-item">
+                <i class="fas fa-fire-extinguisher"></i>
+                <span class="emergency-label">Fire</span>
+                <span class="emergency-number" id="emergencyFire">--</span>
+              </div>
+              <div class="emergency-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="emergency-label">Police</span>
+                <span class="emergency-number" id="emergencyPolice">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="safety-tips card">
+          <h3><i class="fas fa-lightbulb"></i> Travel Safety Tips</h3>
+          <ul id="safetyTips" class="tips-list"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PACKING CHECKLIST ============ -->
+  <section class="section section-alt" id="packing">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-suitcase-rolling"></i> Smart Packing</span>
+        <h2 class="section-title">Smart Packing Checklist</h2>
+        <p class="section-desc">Generate a personalized packing list based on your trip details.</p>
+      </div>
+
+      <div class="packing-layout">
+        <div class="card packing-config">
+          <h3 class="card-title"><i class="fas fa-cog"></i> Configure Your Trip</h3>
+          <form id="packingForm">
+            <div class="form-group">
+              <label for="packDest"><i class="fas fa-map-pin"></i> Destination Type</label>
+              <select id="packDest">
+                <option value="beach">Beach / Tropical</option>
+                <option value="city">City / Urban</option>
+                <option value="mountain">Mountain / Hiking</option>
+                <option value="winter">Cold / Winter</option>
+                <option value="business">Business Trip</option>
+                <option value="adventure">Adventure / Safari</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="packDuration"><i class="fas fa-clock"></i> Duration (days)</label>
+                <input type="number" id="packDuration" value="7" min="1" max="90">
+              </div>
+              <div class="form-group">
+                <label for="packTravelers"><i class="fas fa-users"></i> Travelers</label>
+                <input type="number" id="packTravelers" value="1" min="1" max="10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-plus-circle"></i> Include</label>
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" id="packLaptop"> <span>Laptop/Work</span></label>
+                <label class="checkbox-item"><input type="checkbox" id="packCamera"> <span>Camera/Photography</span></label>
+                <label class="checkbox-item"><input type="checkbox" id="packFitness"> <span>Fitness Gear</span></label>
+                <label class="checkbox-item"><input type="checkbox" id="packKids"> <span>Kids Items</span></label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-magic"></i> Generate Packing List</button>
+          </form>
+        </div>
+
+        <div class="card packing-list-card">
+          <div class="packing-list-header">
+            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Your Packing List</h3>
+            <div class="packing-progress">
+              <span id="packProgress">0 / 0</span>
+              <div class="progress-bar"><div class="progress-fill" id="packProgressBar"></div></div>
+            </div>
+          </div>
+          <div id="packingList" class="packing-list">
+            <div class="empty-state">
+              <i class="fas fa-box-open"></i>
+              <p>Configure your trip and generate a packing list</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CURRENCY CONVERTER ============ -->
+  <section class="section" id="currency">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-coins"></i> Currency</span>
+        <h2 class="section-title">Currency Converter</h2>
+        <p class="section-desc">Get real-time exchange rates and convert between 160+ currencies.</p>
+      </div>
+
+      <div class="currency-converter card">
+        <div class="converter-layout">
+          <div class="converter-from">
+            <label>From</label>
+            <select id="currencyFrom"></select>
+            <input type="number" id="amountFrom" value="1" min="0" step="0.01">
+          </div>
+          <button class="swap-btn" id="swapCurrency" title="Swap currencies">
+            <i class="fas fa-exchange-alt"></i>
+          </button>
+          <div class="converter-to">
+            <label>To</label>
+            <select id="currencyTo"></select>
+            <input type="number" id="amountTo" readonly>
+          </div>
+        </div>
+        <div class="exchange-info">
+          <p id="exchangeRate" class="exchange-rate"></p>
+          <p id="exchangeDate" class="exchange-date"></p>
+        </div>
+        <div class="popular-currencies">
+          <h4>Quick Convert</h4>
+          <div class="currency-chips" id="currencyChips"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOCUMENT STORAGE ============ -->
+  <section class="section section-alt" id="documents">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-folder-open"></i> Documents</span>
+        <h2 class="section-title">Document Storage & Reminders</h2>
+        <p class="section-desc">Securely store travel documents and set important reminders.</p>
+      </div>
+
+      <div class="documents-layout">
+        <div class="card doc-upload-card">
+          <h3 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Store Documents</h3>
+          <form id="docForm">
+            <div class="form-group">
+              <label for="docName"><i class="fas fa-file-alt"></i> Document Name</label>
+              <input type="text" id="docName" placeholder="e.g., Passport, Boarding Pass" required>
+            </div>
+            <div class="form-group">
+              <label for="docType"><i class="fas fa-tag"></i> Document Type</label>
+              <select id="docType">
+                <option value="passport">Passport</option>
+                <option value="visa">Visa</option>
+                <option value="ticket">Ticket / Boarding Pass</option>
+                <option value="hotel">Hotel Booking</option>
+                <option value="insurance">Travel Insurance</option>
+                <option value="id">ID Card</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="docExpiry"><i class="fas fa-calendar-times"></i> Expiry Date (optional)</label>
+              <input type="date" id="docExpiry">
+            </div>
+            <div class="form-group">
+              <label for="docNotes"><i class="fas fa-sticky-note"></i> Notes</label>
+              <textarea id="docNotes" rows="2" placeholder="Document number, details..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="file-upload-label" for="docFile">
+                <i class="fas fa-paperclip"></i> Attach File (stored locally)
+                <input type="file" id="docFile" accept="image/*,.pdf">
+              </label>
+              <span id="fileName" class="file-name"></span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Save Document</button>
+          </form>
+        </div>
+
+        <div class="card doc-reminder-card">
+          <h3 class="card-title"><i class="fas fa-bell"></i> Set Reminder</h3>
+          <form id="reminderForm">
+            <div class="form-group">
+              <label for="reminderTitle"><i class="fas fa-bookmark"></i> Reminder Title</label>
+              <input type="text" id="reminderTitle" placeholder="e.g., Renew Passport" required>
+            </div>
+            <div class="form-group">
+              <label for="reminderDate"><i class="fas fa-calendar"></i> Reminder Date</label>
+              <input type="date" id="reminderDate" required>
+            </div>
+            <div class="form-group">
+              <label for="reminderPriority"><i class="fas fa-exclamation-triangle"></i> Priority</label>
+              <select id="reminderPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-bell"></i> Set Reminder</button>
+          </form>
+        </div>
+
+        <div class="card doc-list-card">
+          <h3 class="card-title"><i class="fas fa-archive"></i> My Documents</h3>
+          <div id="documentsList" class="documents-list">
+            <div class="empty-state">
+              <i class="fas fa-folder-plus"></i>
+              <p>No documents stored yet</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reminders-list-card">
+          <h3 class="card-title"><i class="fas fa-tasks"></i> My Reminders</h3>
+          <div id="remindersList" class="reminders-list">
+            <div class="empty-state">
+              <i class="fas fa-bell-slash"></i>
+              <p>No reminders set yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MAPS ============ -->
+  <section class="section" id="maps">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i class="fas fa-map-marked-alt"></i> Maps</span>
+        <h2 class="section-title">Maps & Location Explorer</h2>
+        <p class="section-desc">Explore destinations, find nearby places, and plan routes on an interactive map.</p>
+      </div>
+
+      <div class="map-layout">
+        <div class="map-controls card">
+          <div class="search-bar map-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="mapSearch" placeholder="Search location..." autocomplete="off">
+            <button class="btn btn-primary btn-sm" id="mapSearchBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="map-actions">
+            <button class="btn btn-outline btn-sm" id="locateMeBtn"><i class="fas fa-crosshairs"></i> My Location</button>
+            <button class="btn btn-outline btn-sm" id="clearMarkersBtn"><i class="fas fa-trash-alt"></i> Clear Markers</button>
+          </div>
+          <div id="mapSearchResults" class="map-search-results"></div>
+          <div class="saved-places">
+            <h4><i class="fas fa-star"></i> Saved Places</h4>
+            <div id="savedPlaces" class="saved-places-list">
+              <p class="text-muted text-sm">Click on the map to save places</p>
+            </div>
+          </div>
+        </div>
+        <div class="map-container">
+          <div id="map" class="map-view"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3><i class="fas fa-globe-americas"></i> GlobeMate</h3>
+          <p>Your smart travel companion for exploring the world with confidence.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <a href="#trip-planner">Trip Planner</a>
+          <a href="#country-info">Countries</a>
+          <a href="#safety">Safety</a>
+          <a href="#currency">Currency</a>
+        </div>
+        <div class="footer-links">
+          <h4>Tools</h4>
+          <a href="#packing">Packing List</a>
+          <a href="#documents">Documents</a>
+          <a href="#maps">Maps</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 GlobeMate. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
