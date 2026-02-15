@@ -2,7 +2,7 @@
 
 A modern, feature-rich travel planning web application built with vanilla JavaScript, Supabase authentication, and real-time APIs. Plan trips, explore countries, track currencies, manage packing lists, and more.
 
-![GlobeMate Banner](img2.jpg)
+![GlobeMate Banner](img2.png)
 
 ---
 
