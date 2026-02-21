@@ -1703,19 +1703,8 @@ body.hero-page .nav-toggle {
 }
 
 /* ========================================
-   Country Info
+   Country Info - Modern Architecture
    ======================================== */
-.country-header-card {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 24px;
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--gray-200);
-  margin-bottom: 24px;
-}
 
 /* Country Display - Modern Elegant Design */
 .country-result {
@@ -1733,77 +1722,119 @@ body.hero-page .nav-toggle {
   }
 }
 
+/* Country Header with Background Image */
 .country-header-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 32px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
   position: relative;
+  min-height: 500px;
+  border-radius: 24px;
+  margin-bottom: 32px;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.country-header-card::before {
-  content: '';
+.country-header-card:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Light overlay for sharper background image */
+.country-header-overlay {
   position: absolute;
   top: 0;
+  left: 0;
   right: 0;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(50%, -50%);
-  pointer-events: none;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+  z-index: 1;
+}
+
+.country-header-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 48px 40px;
+  height: 100%;
+}
+
+.country-flag-wrap {
+  flex-shrink: 0;
 }
 
 .country-flag-wrap img {
-  width: 120px;
-  height: 80px;
+  width: 140px;
+  height: 93px;
   object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-  border: 3px solid rgba(255,255,255,0.3);
-  transition: transform 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  background: white;
 }
 
 .country-flag-wrap img:hover {
-  transform: scale(1.05);
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
+}
+
+.country-title-info {
+  flex: 1;
 }
 
 .country-title-info h3 {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 3rem;
+  font-weight: 800;
   color: white;
-  margin-bottom: 4px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin-bottom: 8px;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .country-title-info p {
-  color: rgba(255,255,255,0.9);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
 }
 
+/* Info Cards Grid - Now Inside Header */
 .country-grid {
+  position: relative;
+  z-index: 3;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  margin: 0;
 }
 
+/* Info Card - Solid Black */
 .info-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px;
+  background: #000;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -1814,98 +1845,94 @@ body.hero-page .nav-toggle {
   left: 0;
   top: 0;
   height: 100%;
-  width: 4px;
-  background: linear-gradient(180deg, var(--card-gradient-start, #667eea), var(--card-gradient-end, #764ba2));
+  width: 5px;
+  background: var(--card-gradient, linear-gradient(180deg, #667eea, #764ba2));
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.4s ease;
   pointer-events: none;
 }
 
 .info-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  transform: translateY(-4px) scale(1.02);
+  background: #111;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .info-card:hover::before {
   opacity: 1;
+  width: 100%;
+  background: var(--card-gradient, linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)));
 }
 
+/* Icon Styling - 3D Effect */
 .info-icon {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--icon-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   color: white;
-  border-radius: 12px;
-  font-size: 1.1rem;
+  border-radius: 14px;
+  font-size: 1.3rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px var(--icon-shadow, rgba(102, 126, 234, 0.3));
-  transition: transform 0.3s ease;
+  box-shadow: 0 6px 20px var(--icon-shadow, rgba(102, 126, 234, 0.4));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.info-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .info-card:hover .info-icon {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 0 10px 32px var(--icon-shadow, rgba(102, 126, 234, 0.5));
 }
 
-/* Specific Icon Colors */
+.info-card:hover .info-icon::after {
+  opacity: 1;
+}
+
+/* Vibrant Color Palette for Info Cards */
 .info-card:nth-child(1) {
   --icon-bg: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --icon-shadow: rgba(240, 147, 251, 0.4);
-  --card-gradient-start: #f093fb;
-  --card-gradient-end: #f5576c;
+  --icon-shadow: rgba(240, 147, 251, 0.5);
+  --card-gradient: linear-gradient(135deg, rgba(240, 147, 251, 0.08), rgba(245, 87, 108, 0.08));
 }
 
 .info-card:nth-child(2) {
   --icon-bg: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --icon-shadow: rgba(79, 172, 254, 0.4);
-  --card-gradient-start: #4facfe;
-  --card-gradient-end: #00f2fe;
+  --icon-shadow: rgba(79, 172, 254, 0.5);
+  --card-gradient: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(0, 242, 254, 0.08));
 }
 
 .info-card:nth-child(3) {
   --icon-bg: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  --icon-shadow: rgba(67, 233, 123, 0.4);
-  --card-gradient-start: #43e97b;
-  --card-gradient-end: #38f9d7;
+  --icon-shadow: rgba(67, 233, 123, 0.5);
+  --card-gradient: linear-gradient(135deg, rgba(67, 233, 123, 0.08), rgba(56, 249, 215, 0.08));
 }
 
 .info-card:nth-child(4) {
   --icon-bg: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  --icon-shadow: rgba(250, 112, 154, 0.4);
-  --card-gradient-start: #fa709a;
-  --card-gradient-end: #fee140;
+  --icon-shadow: rgba(250, 112, 154, 0.5);
+  --card-gradient: linear-gradient(135deg, rgba(250, 112, 154, 0.08), rgba(254, 225, 64, 0.08));
 }
 
 .info-card:nth-child(5) {
   --icon-bg: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-  --icon-shadow: rgba(48, 207, 208, 0.4);
-  --card-gradient-start: #30cfd0;
-  --card-gradient-end: #330867;
+  --icon-shadow: rgba(48, 207, 208, 0.5);
+  --card-gradient: linear-gradient(135deg, rgba(48, 207, 208, 0.08), rgba(51, 8, 103, 0.08));
 }
 
-.info-card:nth-child(6) {
-  --icon-bg: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  --icon-shadow: rgba(168, 237, 234, 0.4);
-  --card-gradient-start: #a8edea;
-  --card-gradient-end: #fed6e3;
-}
-
-.info-card:nth-child(7) {
-  --icon-bg: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-  --icon-shadow: rgba(255, 154, 158, 0.4);
-  --card-gradient-start: #ff9a9e;
-  --card-gradient-end: #fecfef;
-}
-
-.info-card:nth-child(8) {
-  --icon-bg: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  --icon-shadow: rgba(255, 236, 210, 0.4);
-  --card-gradient-start: #ffecd2;
-  --card-gradient-end: #fcb69f;
-}
-
+/* Content Typography */
 .info-content {
   flex: 1;
   min-width: 0;
@@ -1913,45 +1940,68 @@ body.hero-page .nav-toggle {
 
 .info-label {
   font-size: 0.7rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-weight: 600;
+  letter-spacing: 1px;
+  font-weight: 700;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .info-value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: white;
   display: block;
   line-height: 1.3;
+  letter-spacing: -0.2px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* Visa Checker - Enhanced Design */
+/* Visa Checker - Modern Design */
 .visa-checker {
-  margin-top: 32px;
-  background: linear-gradient(135deg, #fafafa 0%, #f3f4f6 100%);
-  border: 2px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-top: 40px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: none;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.visa-checker::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .visa-checker .card-title {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: #1f2937;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .visa-checker .card-title i {
   color: #667eea;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  padding: 12px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .visa-result {
@@ -1971,13 +2021,14 @@ body.hero-page .nav-toggle {
 }
 
 .visa-status {
-  padding: 28px;
-  border-radius: 14px;
+  padding: 36px;
+  border-radius: 20px;
   text-align: center;
-  border: 3px solid;
-  transition: all 0.3s ease;
+  border: none;
+  transition: all 0.4s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .visa-status::before {
@@ -1987,7 +2038,7 @@ body.hero-page .nav-toggle {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
   animation: pulse 3s ease-in-out infinite;
   pointer-events: none;
 }
@@ -2004,8 +2055,8 @@ body.hero-page .nav-toggle {
 }
 
 .visa-status i {
-  font-size: 3.5rem;
-  margin-bottom: 16px;
+  font-size: 4rem;
+  margin-bottom: 20px;
   display: block;
   position: relative;
   z-index: 1;
@@ -2018,7 +2069,7 @@ body.hero-page .nav-toggle {
     opacity: 0;
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.15);
   }
   100% {
     transform: scale(1);
@@ -2027,18 +2078,19 @@ body.hero-page .nav-toggle {
 }
 
 .visa-status h4 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 10px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
+  letter-spacing: -0.3px;
 }
 
 .visa-status p {
-  font-size: 1rem;
-  margin-bottom: 12px;
+  font-size: 1.05rem;
+  margin-bottom: 16px;
   opacity: 0.95;
-  line-height: 1.6;
+  line-height: 1.7;
   position: relative;
   z-index: 1;
 }
@@ -2064,9 +2116,8 @@ body.hero-page .nav-toggle {
 
 .visa-status.visa-free {
   background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  border-color: #10b981;
   color: #065f46;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.35);
 }
 
 .visa-status.visa-free i {
@@ -2075,9 +2126,8 @@ body.hero-page .nav-toggle {
 
 .visa-status.visa-required {
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-color: #f59e0b;
   color: #92400e;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.35);
 }
 
 .visa-status.visa-required i {
@@ -2085,9 +2135,9 @@ body.hero-page .nav-toggle {
 }
 
 .visa-status.visa-on-arrival {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #3b82f6;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #1e40af;
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.35);
 }
 
 .visa-status.visa-on-arrival i {
@@ -2103,6 +2153,437 @@ body.hero-page .nav-toggle {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ========================================
+   Country History & Places - Modern Design
+   ======================================== */
+
+/* History Card */
+.history-card {
+  margin-top: 40px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border: none;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 12px 40px rgba(2, 132, 199, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.history-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.history-card .card-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0c4a6e;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.history-card .card-title i {
+  color: #0284c7;
+  font-size: 1.8rem;
+  padding: 12px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+.history-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  line-height: 1.9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+.history-text p {
+  color: #1f2937;
+  font-size: 1.05rem;
+  margin-bottom: 20px;
+  text-align: justify;
+}
+
+.wiki-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 700;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border-radius: 12px;
+  border: 2px solid #0284c7;
+}
+
+.wiki-link:hover {
+  background: #0284c7;
+  color: white;
+  transform: translateX(5px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+}
+
+.wiki-link i {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.wiki-link:hover i {
+  transform: translateX(3px);
+}
+
+/* Places Card */
+.places-card {
+  margin-top: 40px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: none;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 12px 40px rgba(217, 119, 6, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.places-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.places-card .card-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #78350f;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.places-card .card-title i {
+  color: #d97706;
+  font-size: 1.8rem;
+  padding: 12px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+}
+
+/* Horizontal scrolling container */
+.places-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 -20px;
+  padding: 0 20px 20px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 119, 6, 0.5) rgba(0, 0, 0, 0.05);
+}
+
+.places-scroll-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.places-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.places-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.5);
+  border-radius: 10px;
+}
+
+.places-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 119, 6, 0.7);
+}
+
+.places-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+  width: max-content;
+}
+
+.place-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  border: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  width: 320px;
+}
+
+.place-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 50px rgba(217, 119, 6, 0.25);
+}
+
+.place-image {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.place-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.place-card:hover .place-image img {
+  transform: scale(1.15);
+}
+
+.place-overlay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.place-card:hover .place-overlay {
+  transform: scale(1.1) rotate(-10deg);
+  background: linear-gradient(135deg, #fde68a 0%, #f59e0b 100%);
+}
+
+.place-overlay i {
+  font-size: 1.4rem;
+  color: #d97706;
+  transition: color 0.3s ease;
+}
+
+.place-card:hover .place-overlay i {
+  color: white;
+}
+
+.place-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.place-icon i {
+  font-size: 1.5rem;
+  color: #d97706;
+}
+
+.place-info {
+  padding: 24px;
+  background: white;
+}
+
+.place-info h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.place-info p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+
+.place-type {
+  display: inline-block;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+}
+
+/* Place Image Link */
+.place-image-link {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.place-image-link:hover .place-image img {
+  transform: scale(1.1);
+}
+
+/* Place Info Links */
+.place-info h4 a {
+  color: #f9fafb;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.place-info h4 a:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* Place Actions */
+.place-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.place-location-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.place-location-btn:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.place-wiki-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.place-wiki-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Places Fallback */
+.places-fallback {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.places-fallback p {
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.loading-spinner i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  display: block;
+  color: #9ca3af;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
+.error-message {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+}
+
+.error-message i {
+  font-size: 2.5rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.error-message p {
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 /* ========================================
@@ -3183,12 +3664,33 @@ body.hero-page .nav-toggle {
   }
 
   .country-header-card {
+    min-height: 400px;
+  }
+
+  .country-header-content {
     flex-direction: column;
     text-align: center;
+    padding: 36px 28px;
+    gap: 24px;
+  }
+
+  .country-flag-wrap img {
+    width: 120px;
+    height: 80px;
+  }
+
+  .country-title-info h3 {
+    font-size: 2.2rem;
+  }
+
+  .country-title-info p {
+    font-size: 1rem;
   }
 
   .country-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 16px;
   }
 
   .checkbox-group {
@@ -3259,6 +3761,36 @@ body.hero-page .nav-toggle {
 
   .search-bar button {
     width: 100%;
+  }
+
+  /* History & Places */
+  .places-grid {
+    /* Keep horizontal scroll on mobile */
+    flex-direction: row;
+  }
+
+  .place-card {
+    width: 280px;
+    flex-shrink: 0;
+  }
+
+  .place-image {
+    height: 200px;
+  }
+
+  .history-card,
+  .places-card {
+    padding: 28px 24px;
+    border-radius: 20px;
+  }
+
+  .history-card .card-title,
+  .places-card .card-title {
+    font-size: 1.4rem;
+  }
+
+  .history-content {
+    padding: 24px;
   }
 
   /* Safety */
@@ -3379,14 +3911,14 @@ body.hero-page .nav-toggle {
 
   /* Country Info Mobile */
   .country-header-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 24px;
+    min-height: 350px;
   }
 
-  .country-header-card::before {
-    width: 150px;
-    height: 150px;
+  .country-header-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 20px 20px 20px;
+    gap: 16px;
   }
 
   .country-title-info h3 {
@@ -3395,11 +3927,13 @@ body.hero-page .nav-toggle {
 
   .country-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
+    padding: 16px;
   }
 
   .info-card {
-    padding: 16px 20px;
+    padding: 16px;
+    gap: 12px;
   }
 
   .info-icon {
@@ -3448,31 +3982,44 @@ body.hero-page .nav-toggle {
 
   /* Country Info - Extra Small */
   .country-header-card {
-    padding: 20px;
+    min-height: 220px;
+    border-radius: 16px;
+  }
+
+  .country-header-content {
+    padding: 28px 20px;
+    gap: 20px;
   }
 
   .country-flag-wrap img {
     width: 100px;
     height: 66px;
+    border-radius: 12px;
+    border-width: 3px;
   }
 
   .country-title-info h3 {
-    font-size: 1.3rem;
+    font-size: 1.8rem;
+  }
+
+  .country-title-info p {
+    font-size: 0.9rem;
   }
 
   .info-card {
-    padding: 14px 16px;
-    gap: 12px;
+    padding: 20px;
+    gap: 16px;
   }
 
   .info-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 0.9rem;
+    width: 52px;
+    height: 52px;
+    font-size: 1.2rem;
+    border-radius: 14px;
   }
 
   .info-value {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .visa-checker {
@@ -3481,6 +4028,81 @@ body.hero-page .nav-toggle {
 
   .visa-checker .card-title {
     font-size: 1.1rem;
+  }
+
+  /* History & Places - Extra Small */
+  .history-card,
+  .places-card {
+    padding: 24px 20px;
+    border-radius: 16px;
+    margin-top: 32px;
+  }
+
+  .history-card .card-title,
+  .places-card .card-title {
+    font-size: 1.2rem;
+    gap: 8px;
+  }
+
+  .history-card .card-title i,
+  .places-card .card-title i {
+    font-size: 1.4rem;
+    padding: 10px;
+  }
+
+  .history-content,
+  .places-fallback {
+    padding: 20px;
+  }
+
+  .history-text p {
+    font-size: 0.95rem;
+  }
+
+  .place-card {
+    padding: 0;
+  }
+
+  .place-image {
+    height: 180px;
+  }
+
+  .place-overlay {
+    width: 48px;
+    height: 48px;
+    top: 12px;
+    right: 12px;
+    border-radius: 12px;
+  }
+
+  .place-overlay i {
+    font-size: 1.1rem;
+  }
+
+  .place-info {
+    padding: 20px;
+  }
+
+  .place-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .place-icon i {
+    font-size: 1.2rem;
+  }
+
+  .place-info h4 {
+    font-size: 1.1rem;
+  }
+
+  .place-info p {
+    font-size: 0.9rem;
+  }
+
+  .place-type {
+    font-size: 0.7rem;
+    padding: 5px 12px;
   }
 
   /* Navigation */

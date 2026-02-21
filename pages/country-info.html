@@ -16,70 +16,75 @@
     </div>
 
     <div id="countryResult" class="country-result hidden">
-      <div class="country-header-card">
-        <div class="country-flag-wrap">
-          <img id="countryFlag" src="" alt="Flag">
+      <div class="country-header-card" id="countryHeaderCard">
+        <div class="country-header-overlay"></div>
+        <div class="country-header-content">
+          <div class="country-flag-wrap">
+            <img id="countryFlag" src="" alt="Flag">
+          </div>
+          <div class="country-title-info">
+            <h3 id="countryName"></h3>
+            <p id="countryOfficialName" class="text-muted"></p>
+          </div>
         </div>
-        <div class="country-title-info">
-          <h3 id="countryName"></h3>
-          <p id="countryOfficialName" class="text-muted"></p>
+        <!-- Info cards now inside header -->
+        <div class="country-grid">
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-city"></i></div>
+            <div class="info-content">
+              <span class="info-label">Capital</span>
+              <span class="info-value" id="countryCapital"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-globe"></i></div>
+            <div class="info-content">
+              <span class="info-label">Region</span>
+              <span class="info-value" id="countryRegion"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-users"></i></div>
+            <div class="info-content">
+              <span class="info-label">Population</span>
+              <span class="info-value" id="countryPopulation"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-language"></i></div>
+            <div class="info-content">
+              <span class="info-label">Languages</span>
+              <span class="info-value" id="countryLanguages"></span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="info-content">
+              <span class="info-label">Currency</span>
+              <span class="info-value" id="countryCurrency"></span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="country-grid">
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-city"></i></div>
-          <div class="info-content">
-            <span class="info-label">Capital</span>
-            <span class="info-value" id="countryCapital"></span>
+
+      <!-- Important Places to Visit - Now First -->
+      <div id="countryPlaces" class="card places-card hidden">
+        <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> Important Places to Visit</h3>
+        <div class="places-scroll-wrapper">
+          <div id="placesContent" class="places-grid">
+            <div class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i> Loading places...
+            </div>
           </div>
         </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-globe"></i></div>
-          <div class="info-content">
-            <span class="info-label">Region</span>
-            <span class="info-value" id="countryRegion"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-users"></i></div>
-          <div class="info-content">
-            <span class="info-label">Population</span>
-            <span class="info-value" id="countryPopulation"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-language"></i></div>
-          <div class="info-content">
-            <span class="info-label">Languages</span>
-            <span class="info-value" id="countryLanguages"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-money-bill-wave"></i></div>
-          <div class="info-content">
-            <span class="info-label">Currency</span>
-            <span class="info-value" id="countryCurrency"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-clock"></i></div>
-          <div class="info-content">
-            <span class="info-label">Timezone</span>
-            <span class="info-value" id="countryTimezone"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-phone"></i></div>
-          <div class="info-content">
-            <span class="info-label">Calling Code</span>
-            <span class="info-value" id="countryCallingCode"></span>
-          </div>
-        </div>
-        <div class="info-card">
-          <div class="info-icon"><i class="fas fa-car"></i></div>
-          <div class="info-content">
-            <span class="info-label">Driving Side</span>
-            <span class="info-value" id="countryDriving"></span>
+      </div>
+
+      <!-- Country History & Overview - Now After Places -->
+      <div id="countryHistory" class="card history-card hidden">
+        <h3 class="card-title"><i class="fas fa-book"></i> History & Overview</h3>
+        <div id="historyContent" class="history-content">
+          <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i> Loading history...
           </div>
         </div>
       </div>

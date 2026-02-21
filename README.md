@@ -57,13 +57,20 @@ The app uses a **Single Page Application (SPA)** architecture with dynamic page 
 - Save and manage multiple trips
 
 ### 🏳️ **Country Information**
-- Search 195+ countries
-- View detailed information:
+- Search 195+ countries with autocomplete suggestions
+- View comprehensive country details:
   - Capital, population, region
   - Languages, currencies
   - Flag and coat of arms
   - Time zones and calling codes
-- Visa requirements and travel advisories
+  - Driving side
+- **NEW: Historical Overview** - Wikipedia API integration for country history and culture
+- **NEW: Important Places to Visit** - Curated tourist attractions with images for 16 popular countries
+  - Beautiful place cards with high-quality images
+  - Detailed descriptions and categorization (Landmark, Museum, Nature, etc.)
+  - Covers France, Japan, Italy, Spain, UK, USA, China, Egypt, India, Australia, Brazil, Germany, Canada, Mexico, Greece, Thailand
+- Visa eligibility checker - Compare passport requirements between countries
+- Travel advisories and entry requirements
 
 ### 🛡️ **Safety Hub**
 - Health and vaccination requirements
@@ -308,10 +315,35 @@ Each page is an independent module following this pattern:
 - Local storage for persistence
 
 ### Country Info (`country-info.js`)
-- Search bar with autocomplete
-- REST API: `https://restcountries.com/v3.1/`
-- Display cards with flag, capital, population, languages
-- Modal for detailed view
+- **Search System**:
+  - Real-time autocomplete with country flags
+  - Searches both common and official names
+  - Displays up to 8 matching suggestions
+  - Click to select and display full information
+- **Basic Information Display**:
+  - REST API: `https://restcountries.com/v3.1/all`
+  - Info cards showing: Capital, Region, Population, Languages, Currency, Timezone, Calling Code, Driving Side
+  - Country flag (SVG) and official name
+  - Clean grid layout (2 columns on desktop, 1 on mobile)
+- **Historical Overview Section** (NEW):
+  - Wikipedia REST API integration
+  - Fetches country summary on selection
+  - 2-3 paragraph historical and cultural context
+  - Direct link to full Wikipedia article
+  - Loading states and error handling
+- **Important Places Section** (NEW):
+  - Curated database of 64 tourist destinations
+  - High-quality images from Unsplash (400x300px)
+  - Place cards with image, icon overlay, description, and category badge
+  - Covers 16 popular countries
+  - Fallback to Wikipedia tourism information for other countries
+  - Responsive grid layout with hover animations
+- **Visa Eligibility Checker**:
+  - Located at bottom of page for logical flow
+  - Passport country selector (all 195+ countries)
+  - Compares against selected destination
+  - Visual status indicators (Visa-Free, Required, On Arrival)
+  - Color-coded results with detailed messaging
 
 ### Currency (`currency.js`)
 - Dropdown selectors for currencies
@@ -412,9 +444,52 @@ Located in `:root` CSS variables (`styles.css`):
 
 ### REST Countries API
 - **Endpoint**: `https://restcountries.com/v3.1/all`
-- **Usage**: Country information (name, capital, flag, population)
-- **Rate Limit**: None (free)
+- **Usage**: Comprehensive country database with 195+ countries
+- **Data Retrieved**: 
+  - Country names (common and official)
+  - Flags (SVG format)
+  - Capital cities
+  - Geographic regions and subregions
+  - Population statistics
+  - Languages spoken
+  - Currency information (name, symbol, code)
+  - Calling codes (IDD)
+  - Driving side (left/right)
+  - Country codes (cca3, cca2)
+- **Implementation**: 
+  - Loaded on page init and cached for performance
+  - Search functionality with autocomplete
+  - Dropdown population for visa checker
+- **Rate Limit**: None (free, open API)
 - **Docs**: [restcountries.com](https://restcountries.com)
+
+### Wikipedia REST API
+- **Endpoint**: `https://en.wikipedia.org/api/rest_v1/page/summary/{country}`
+- **Usage**: Fetches historical overview and cultural information for searched countries
+- **Data Retrieved**:
+  - Country summary (extract) - 2-3 paragraph overview
+  - Title and page information
+  - Links to full Wikipedia articles
+  - Fallback: Tourism page information if main page unavailable
+- **Implementation**: 
+  - Async fetch when country is selected
+  - Error handling with graceful fallback messages
+  - Loading states with spinner animation
+  - Direct link to full Wikipedia article for more details
+- **Rate Limit**: Standard Wikipedia API limits (reasonable use)
+- **Docs**: [wikimedia.org/api/rest_v1](https://en.wikipedia.org/api/rest_v1/)
+
+### Image Sources (Unsplash)
+- **Source**: Unsplash Image CDN
+- **Usage**: High-quality tourist destination images for important places
+- **Implementation**:
+  - Curated image URLs for 64 popular tourist destinations
+  - 400x300px optimized sizes with crop parameter
+  - Fallback to placeholder if image fails to load
+  - Images embedded in places database
+- **Countries Covered**: France, Japan, Italy, Spain, UK, USA, China, Egypt, India, Australia, Brazil, Germany, Canada, Mexico, Greece, Thailand
+- **Attribution**: Images from Unsplash (free to use)
+- **Docs**: [unsplash.com](https://unsplash.com)
 
 ### Exchange Rate API (Example)
 - **Endpoint**: `https://api.exchangerate-api.com/v4/latest/USD`
@@ -431,7 +506,171 @@ Located in `:root` CSS variables (`styles.css`):
 - **Features Used**:
   - Auth: `auth.signUp()`, `auth.signInWithPassword()`, `auth.signOut()`
   - Database: `profiles` table with user metadata
+  - Session management and persistence
 - **Docs**: [supabase.com/docs](https://supabase.com/docs)
+
+---
+
+## 🌟 Country Information Module - Detailed Integration
+
+### Feature Overview
+The Country Information module is one of the most feature-rich sections, combining multiple APIs and data sources to provide comprehensive travel information.
+
+### Data Flow Architecture
+
+1. **Initial Load**
+   ```javascript
+   // On module init
+   CountryExplorer.init()
+   └── loadCountries()
+       └── fetch('https://restcountries.com/v3.1/all')
+           └── Cache 195+ countries locally
+           └── Populate passport dropdown
+   ```
+
+2. **Country Search**
+   ```javascript
+   // User types in search bar
+   handleSearch(query)
+   └── Filter cached countries by name
+   └── showSuggestions() with flags
+   └── User clicks → selectCountry(code)
+   ```
+
+3. **Country Selection Triggers Three Parallel Data Loads**
+   ```javascript
+   selectCountry(code)
+   ├── displayCountryInfo(country)        // From cached data
+   ├── loadCountryHistory(country)        // Wikipedia API call
+   └── loadImportantPlaces(country)       // Local database + images
+   ```
+
+### Wikipedia Integration (History Section)
+
+**Purpose**: Provide cultural and historical context for each country
+
+**Implementation**:
+```javascript
+async loadCountryHistory(country) {
+  const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${country.name.common}`;
+  const response = await fetch(wikiUrl);
+  const data = await response.json();
+  
+  // Display extract (2-3 paragraph summary)
+  // Show "Read more on Wikipedia" link
+  // Error handling: "Historical information unavailable"
+}
+```
+
+**Benefits**:
+- Real-time, accurate information from Wikipedia
+- Always up-to-date content
+- Covers virtually every country
+- Provides cultural context for travelers
+
+### Important Places Integration
+
+**Purpose**: Showcase must-visit tourist destinations with visual appeal
+
+**Architecture**:
+- **Curated Database**: 64 hand-picked destinations across 16 countries
+- **Image Integration**: High-quality Unsplash images (400x300px)
+- **Fallback System**: Wikipedia tourism page for uncovered countries
+
+**Data Structure**:
+```javascript
+{
+  name: "Eiffel Tower",
+  description: "Iconic iron lattice tower in Paris, symbol of France",
+  type: "Landmark",
+  icon: "landmark",  // FontAwesome icon
+  image: "https://images.unsplash.com/photo-..." // Optimized URL
+}
+```
+
+**Display Features**:
+- Grid layout (responsive: 3 columns → 2 → 1)
+- Image cards with hover effects (scale 1.1)
+- Icon overlay in top-right corner
+- Category badges (Landmark, Museum, Nature, etc.)
+- Loading states and error handling
+
+**Covered Countries**:
+1. **Europe**: France, Italy, Spain, UK, Germany, Greece
+2. **Asia**: Japan, China, India, Thailand
+3. **Americas**: USA, Canada, Brazil, Mexico
+4. **Oceania**: Australia
+5. **Africa**: Egypt
+
+### Visa Checker Integration
+
+**Purpose**: Help travelers understand entry requirements
+
+**Implementation**:
+- Compares user's passport country against destination country
+- Simplified logic with extensible architecture
+- Three status types: Visa-Free, Visa Required, Visa on Arrival
+- Visual indicators with color coding (green, amber, blue)
+
+**Flow**:
+```javascript
+checkVisa()
+├── Get selected passport country
+├── Get current destination country
+└── getVisaRequirement(passport, destination)
+    ├── Same country? → "No visa required"
+    ├── Strong passport + easy destination? → "Visa-free"
+    └── Default → "Visa required"
+```
+
+### Performance Optimizations
+
+1. **Data Caching**: Countries loaded once, cached in memory
+2. **Lazy Loading**: History and places only load when country selected
+3. **Image Optimization**: Pre-sized URLs (400x300) reduce bandwidth
+4. **Search Debouncing**: Reduces API calls during typing
+5. **Error Recovery**: Graceful fallbacks prevent broken UI
+
+### User Experience Flow
+
+```
+User Journey: Search for "Japan"
+│
+├─ [1] Types "jap" → Autocomplete shows Japan with flag
+├─ [2] Clicks Japan → Basic info displays instantly (cached)
+├─ [3] Loading spinners appear for History & Places
+├─ [4] History loads (~500ms) → Wikipedia summary appears
+├─ [5] Places load instantly → 4 cards: Mount Fuji, Imperial Palace, Fushimi Inari, Hiroshima
+├─ [6] User scrolls down → Visa checker ready at bottom
+└─ [7] Selects passport country → Instant visa status
+```
+
+### Code Organization
+
+**Files**:
+- `js/country-info.js` - Main module (520+ lines)
+- `pages/country-info.html` - UI structure with new sections
+- `css/styles.css` - Styling for history cards, place cards, responsive design
+
+**Key Functions**:
+- `loadCountries()` - Bootstrap REST Countries API data
+- `handleSearch()` - Real-time search with suggestions
+- `selectCountry()` - Orchestrates data display
+- `displayCountryInfo()` - Renders basic country stats
+- `loadCountryHistory()` - Wikipedia API integration
+- `loadImportantPlaces()` - Places rendering with images
+- `getImportantPlaces()` - Curated destination database
+- `fetchPlacesFromWikipedia()` - Fallback for uncovered countries
+- `checkVisa()` - Visa status determination
+
+### Future Enhancements
+- [ ] Real visa requirement database integration
+- [ ] More countries in curated places database
+- [ ] User reviews and ratings for places
+- [ ] Save favorite destinations
+- [ ] Export country information as PDF
+- [ ] Weather information integration
+- [ ] Cost of living comparison
 
 ---
 
@@ -538,12 +777,14 @@ SOFTWARE.
 
 ## 🙏 Acknowledgments
 
-- **Font Awesome** for icon library
-- **Google Fonts** for typography
-- **Supabase** for authentication backend
-- **Leaflet.js** for map functionality
-- **REST Countries API** for country data
-- **Unsplash** for background images
+- **Font Awesome** for comprehensive icon library
+- **Google Fonts** (Inter, Playfair Display) for typography
+- **Supabase** for authentication backend and database
+- **Leaflet.js** for interactive map functionality
+- **REST Countries API** for comprehensive country data
+- **Wikipedia REST API** for historical and cultural information
+- **Unsplash** for high-quality tourist destination images
+- Open-source community for inspiration and support
 
 ---
 
