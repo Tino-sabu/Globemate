@@ -100,7 +100,7 @@
           document.body.className = ''; // Clear previous classes
           document.body.classList.add(`page-${pageId}`);
           const navbar = document.getElementById('navbar');
-          if (['home', 'trip-planner', 'country-info', 'safety'].includes(pageId)) {
+          if (['home', 'country-info', 'safety', 'trip-planner'].includes(pageId)) {
             document.body.classList.add('hero-page');
             console.log(`✅ Added hero-page class for: ${pageId}`);
             // Remove scrolled class immediately on hero pages

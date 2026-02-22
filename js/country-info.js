@@ -50,6 +50,47 @@
       } else {
         console.warn('Visa check button not found! ID: checkVisaBtn');
       }
+
+      // Fix Country & Plan Trip button
+      const fixCountryBtn = document.getElementById('fixCountryBtn');
+      if (fixCountryBtn) {
+        fixCountryBtn.addEventListener('click', () => {
+          this.fixCountryAndPlanTrip();
+        });
+      }
+    },
+
+    fixCountryAndPlanTrip() {
+      if (!this.currentCountry) {
+        if (typeof showToast === 'function') {
+          showToast('Please search and select a country first.', 'warning');
+        }
+        return;
+      }
+
+      const country = this.currentCountry;
+      const destination = {
+        name: country.name.common,
+        officialName: country.name.official,
+        flag: country.flags?.svg || '',
+        capital: country.capital?.[0] || '',
+        region: country.region || '',
+        cca3: country.cca3 || ''
+      };
+
+      // Save destination to localStorage
+      localStorage.setItem('globemate_trip_destination', JSON.stringify(destination));
+
+      if (typeof showToast === 'function') {
+        showToast(`${country.name.common} fixed as destination! Redirecting to Trip Planner...`, 'success');
+      }
+
+      // Navigate to trip planner
+      setTimeout(() => {
+        if (typeof PageLoader !== 'undefined') {
+          PageLoader.loadPage('trip-planner');
+        }
+      }, 800);
     },
 
     async loadCountries() {
@@ -247,6 +288,12 @@
         const countryResultDiv = document.getElementById('countryResult');
         if (countryResultDiv) {
           countryResultDiv.classList.remove('hidden');
+        }
+
+        // Update Plan Trip CTA country name
+        const planTripCountryName = document.getElementById('planTripCountryName');
+        if (planTripCountryName) {
+          planTripCountryName.textContent = country.name.common;
         }
         
       } catch (error) {

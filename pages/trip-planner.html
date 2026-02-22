@@ -1,77 +1,257 @@
-<section class="section tab-section" id="trip-planner">
+<!-- ============ TRIP PLANNER (Flight Search) ============ -->
+<section class="section section-alt tab-section" id="trip-planner">
   <div class="container">
-    <div class="section-header">
-      <span class="section-badge"><i class="fas fa-route"></i> Trip Planner</span>
-      <h2 class="section-title">Plan Your Perfect Trip</h2>
-      <p class="section-desc">Organize your itinerary, set budgets, and keep all your trip details in one place.</p>
+
+    <!-- Hero Header -->
+    <div class="tp-hero-header">
+      <div class="tp-hero-glow"></div>
+      <span class="tp-badge"><i class="fas fa-route"></i> Trip Planner</span>
+      <h2 class="tp-title">Plan Your <span class="tp-gradient-text">Journey</span></h2>
+      <p class="tp-subtitle">Search flights, compare prices, and book your next adventure — all in one place.</p>
     </div>
 
-    <div class="trip-planner-layout">
-      <!-- Trip Form -->
-      <div class="card trip-form-card">
-        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Create New Trip</h3>
-        <form id="tripForm" class="trip-form">
-          <div class="form-group">
-            <label for="tripName"><i class="fas fa-tag"></i> Trip Name</label>
-            <input type="text" id="tripName" placeholder="e.g., European Adventure" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tripDest"><i class="fas fa-map-pin"></i> Destination</label>
-              <input type="text" id="tripDest" placeholder="e.g., Paris, France" required>
-            </div>
-            <div class="form-group">
-              <label for="tripBudget"><i class="fas fa-wallet"></i> Budget (USD)</label>
-              <input type="number" id="tripBudget" placeholder="e.g., 3000" min="0">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tripStart"><i class="fas fa-calendar"></i> Start Date</label>
-              <input type="date" id="tripStart" required>
-            </div>
-            <div class="form-group">
-              <label for="tripEnd"><i class="fas fa-calendar-check"></i> End Date</label>
-              <input type="date" id="tripEnd" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="tripNotes"><i class="fas fa-sticky-note"></i> Notes</label>
-            <textarea id="tripNotes" rows="3" placeholder="Any special plans or notes..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Save Trip</button>
-        </form>
+    <!-- Destination Banner -->
+    <div class="tp-dest-banner" id="tripDestBanner">
+      <div class="tp-dest-shine"></div>
+      <div class="tp-dest-left">
+        <div class="tp-dest-flag-wrap">
+          <img id="tripDestFlag" src="" alt="Flag">
+          <span class="tp-dest-pin"><i class="fas fa-map-pin"></i></span>
+        </div>
+        <div class="tp-dest-info">
+          <span class="tp-dest-eyebrow"><i class="fas fa-crosshairs"></i> Destination Fixed</span>
+          <h3 id="tripDestName">No destination selected</h3>
+          <p id="tripDestDetails">Go to Countries page to fix a destination.</p>
+        </div>
       </div>
+      <button class="tp-change-btn" id="changeDestBtn">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Change</span>
+      </button>
+    </div>
 
-      <!-- Itinerary -->
-      <div class="card itinerary-card">
-        <h3 class="card-title"><i class="fas fa-list-ol"></i> Itinerary</h3>
-        <div id="itinerarySection" class="itinerary-section">
-          <div class="empty-state" id="itineraryEmpty">
-            <i class="fas fa-map-signs"></i>
-            <p>Create a trip to start adding activities</p>
-          </div>
-          <div id="itineraryBuilder" class="hidden">
-            <div class="itinerary-add">
-              <input type="text" id="activityInput" placeholder="Add an activity...">
-              <input type="time" id="activityTime">
-              <button class="btn btn-sm btn-primary" id="addActivityBtn"><i class="fas fa-plus"></i></button>
+    <!-- Step Progress Bar -->
+    <div class="tp-steps-bar">
+      <div class="tp-step active" data-step="1">
+        <span class="tp-step-num">1</span>
+        <span class="tp-step-label">Details</span>
+      </div>
+      <div class="tp-step-line"><div class="tp-step-line-fill"></div></div>
+      <div class="tp-step" data-step="2">
+        <span class="tp-step-num">2</span>
+        <span class="tp-step-label">Search</span>
+      </div>
+      <div class="tp-step-line"><div class="tp-step-line-fill"></div></div>
+      <div class="tp-step" data-step="3">
+        <span class="tp-step-num">3</span>
+        <span class="tp-step-label">Book</span>
+      </div>
+    </div>
+
+    <!-- Trip Details Form -->
+    <div class="tp-form-card" id="tripFormSection">
+      <div class="tp-form-header">
+        <div class="tp-form-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div>
+          <h3>Trip Details</h3>
+          <p>Tell us about your journey</p>
+        </div>
+      </div>
+      <form id="tripDetailsForm" class="tp-form">
+        <div class="tp-form-grid">
+          <div class="tp-field">
+            <label for="tripHostCountry">
+              <span class="tp-field-icon"><i class="fas fa-home"></i></span>
+              Host Country
+            </label>
+            <div class="tp-input-wrap">
+              <input type="text" id="tripHostCountry" placeholder="Where do you live?" autocomplete="off" required>
+              <div id="hostCountrySuggestions" class="suggestions-dropdown hidden"></div>
             </div>
-            <ul id="activityList" class="activity-list"></ul>
           </div>
+          <div class="tp-field">
+            <label for="tripCurrentLocation">
+              <span class="tp-field-icon"><i class="fas fa-map-marker-alt"></i></span>
+              Current City
+            </label>
+            <div class="tp-location-wrap">
+              <input type="text" id="tripCurrentLocation" placeholder="Departure city..." required>
+              <button type="button" class="tp-detect-btn" id="detectLocationBtn" title="Detect my location">
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="tp-form-grid">
+          <div class="tp-field">
+            <label for="tripDate">
+              <span class="tp-field-icon"><i class="fas fa-calendar-alt"></i></span>
+              Departure Date
+            </label>
+            <input type="date" id="tripDate" required>
+          </div>
+          <div class="tp-field">
+            <label for="tripReturnDate">
+              <span class="tp-field-icon"><i class="fas fa-calendar-check"></i></span>
+              Return Date <span class="tp-optional">(optional)</span>
+            </label>
+            <input type="date" id="tripReturnDate">
+          </div>
+        </div>
+
+        <div class="tp-divider"><span>Travel Mode</span></div>
+
+        <div class="tp-mode-grid">
+          <label class="tp-mode selected" data-mode="flight">
+            <input type="radio" name="travelMode" value="flight" checked>
+            <div class="tp-mode-inner">
+              <div class="tp-mode-icon-wrap"><i class="fas fa-plane"></i></div>
+              <span class="tp-mode-name">Flight</span>
+              <span class="tp-mode-check"><i class="fas fa-check"></i></span>
+            </div>
+          </label>
+          <label class="tp-mode" data-mode="train">
+            <input type="radio" name="travelMode" value="train">
+            <div class="tp-mode-inner">
+              <div class="tp-mode-icon-wrap"><i class="fas fa-train"></i></div>
+              <span class="tp-mode-name">Train</span>
+              <span class="tp-mode-check"><i class="fas fa-check"></i></span>
+            </div>
+          </label>
+          <label class="tp-mode" data-mode="bus">
+            <input type="radio" name="travelMode" value="bus">
+            <div class="tp-mode-inner">
+              <div class="tp-mode-icon-wrap"><i class="fas fa-bus"></i></div>
+              <span class="tp-mode-name">Bus</span>
+              <span class="tp-mode-check"><i class="fas fa-check"></i></span>
+            </div>
+          </label>
+          <label class="tp-mode" data-mode="ship">
+            <input type="radio" name="travelMode" value="ship">
+            <div class="tp-mode-inner">
+              <div class="tp-mode-icon-wrap"><i class="fas fa-ship"></i></div>
+              <span class="tp-mode-name">Ship</span>
+              <span class="tp-mode-check"><i class="fas fa-check"></i></span>
+            </div>
+          </label>
+        </div>
+
+        <div class="tp-passengers-row">
+          <div class="tp-passengers-label">
+            <i class="fas fa-user-friends"></i>
+            <span>Passengers</span>
+          </div>
+          <div class="tp-passengers-ctrl">
+            <button type="button" class="tp-pax-btn" id="passDecrease"><i class="fas fa-minus"></i></button>
+            <span id="passengerCount" class="tp-pax-count">1</span>
+            <button type="button" class="tp-pax-btn" id="passIncrease"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+
+        <button type="submit" class="tp-search-btn" id="searchFlightsBtn">
+          <span class="tp-search-btn-bg"></span>
+          <i class="fas fa-search"></i>
+          <span>Search Flights</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Nearest Airports -->
+    <div class="tp-airports-card hidden" id="nearestAirportsCard">
+      <div class="tp-card-head">
+        <div class="tp-card-head-icon amber"><i class="fas fa-plane-departure"></i></div>
+        <div>
+          <h3>Nearest Airports</h3>
+          <p>Closest departure airports based on your location</p>
+        </div>
+      </div>
+      <div id="nearestAirportsList" class="tp-airports-grid"></div>
+    </div>
+
+    <!-- Flight Results -->
+    <div class="tp-flights-card hidden" id="flightResultsCard">
+      <div class="tp-flights-header">
+        <div class="tp-card-head">
+          <div class="tp-card-head-icon blue"><i class="fas fa-plane"></i></div>
+          <div>
+            <h3>Available Flights</h3>
+            <p id="flightResultsCount"></p>
+          </div>
+        </div>
+        <div class="tp-sort-wrap">
+          <i class="fas fa-sort-amount-down"></i>
+          <select id="flightSortBy">
+            <option value="price">Cheapest First</option>
+            <option value="duration">Fastest First</option>
+            <option value="departure">Earliest First</option>
+          </select>
         </div>
       </div>
 
-      <!-- Saved Trips -->
-      <div class="card saved-trips-card">
-        <h3 class="card-title"><i class="fas fa-suitcase"></i> My Trips</h3>
-        <div id="savedTrips" class="saved-trips">
-          <div class="empty-state">
-            <i class="fas fa-plane-departure"></i>
-            <p>No trips yet. Create your first adventure!</p>
-          </div>
+      <div id="flightResultsLoading" class="tp-flight-loading hidden">
+        <div class="tp-loader-plane">
+          <i class="fas fa-plane"></i>
+          <div class="tp-loader-trail"></div>
+        </div>
+        <p>Scanning airlines for the best deals...</p>
+        <div class="tp-loader-bar"><div class="tp-loader-bar-fill"></div></div>
+      </div>
+
+      <div id="flightResultsList" class="tp-flights-list"></div>
+
+      <div id="flightResultsEmpty" class="tp-empty hidden">
+        <div class="tp-empty-icon"><i class="fas fa-plane-slash"></i></div>
+        <h3>No Flights Found</h3>
+        <p>Try different dates or departure location</p>
+      </div>
+    </div>
+
+    <!-- Booking Links -->
+    <div class="tp-booking-card hidden" id="bookingLinksCard">
+      <div class="tp-card-head">
+        <div class="tp-card-head-icon green"><i class="fas fa-external-link-alt"></i></div>
+        <div>
+          <h3>Compare & Book</h3>
+          <p>Find the best deal on trusted platforms</p>
+        </div>
+      </div>
+      <div id="bookingLinks" class="tp-booking-grid"></div>
+    </div>
+
+    <!-- Trip Summary -->
+    <div class="tp-summary-card hidden" id="tripSummaryCard">
+      <div class="tp-card-head">
+        <div class="tp-card-head-icon purple"><i class="fas fa-clipboard-check"></i></div>
+        <div>
+          <h3>Trip Summary</h3>
+          <p>Review and save your travel plan</p>
+        </div>
+      </div>
+      <div id="tripSummaryContent" class="tp-summary-body"></div>
+      <div class="tp-summary-actions">
+        <button class="tp-action-btn primary" id="saveTripBtn"><i class="fas fa-save"></i> Save Trip</button>
+        <button class="tp-action-btn ghost" id="shareTripBtn"><i class="fas fa-share-alt"></i> Share</button>
+      </div>
+    </div>
+
+    <!-- Saved Trips -->
+    <div class="tp-saved-card" id="savedTripsSection">
+      <div class="tp-card-head">
+        <div class="tp-card-head-icon gold"><i class="fas fa-suitcase"></i></div>
+        <div>
+          <h3>My Trips</h3>
+          <p>Your saved travel plans</p>
+        </div>
+      </div>
+      <div id="savedTripsList" class="tp-saved-list">
+        <div class="tp-empty" id="noTripsMessage">
+          <div class="tp-empty-icon"><i class="fas fa-plane-departure"></i></div>
+          <h3>No Saved Trips</h3>
+          <p>Search for flights to start planning!</p>
         </div>
       </div>
     </div>
+
   </div>
 </section>
