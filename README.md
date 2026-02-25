@@ -787,16 +787,3 @@ SOFTWARE.
 - Open-source community for inspiration and support
 
 ---
-
-## 📧 Contact & Support
-
-For questions, issues, or feature requests:
-- Open an issue on GitHub
-- Email: support@globemate.app (example)
-- Twitter: @globemateapp (example)
-
----
-
-**Made with ❤️ by the GlobeMate Team**
-
-*Happy travels! 🌍✈️*
