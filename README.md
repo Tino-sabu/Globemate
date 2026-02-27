@@ -1,6 +1,6 @@
 # 🌍 GlobeMate — Your Smart Travel Companion
 
-A modern, feature-rich travel planning web application built with vanilla JavaScript, Supabase authentication, and real-time APIs. Plan trips, explore countries, track currencies, manage packing lists, and more.
+A modern, feature-rich travel planning web application built with vanilla JavaScript, Firebase Authentication, Cloud Firestore, and real-time APIs. Plan trips, explore countries, track currencies, manage packing lists, and more.
 
 ![GlobeMate Banner](img2.png)
 
@@ -32,7 +32,7 @@ A modern, feature-rich travel planning web application built with vanilla JavaSc
 - **Explore** interactive maps with location markers
 - **Stay safe** with health advisories and emergency contacts
 
-The app uses a **Single Page Application (SPA)** architecture with dynamic page loading, smooth transitions, and persistent user sessions via Supabase.
+The app uses a **Single Page Application (SPA)** architecture with dynamic page loading, smooth transitions, and persistent user sessions via Firebase Authentication.
 
 ---
 
@@ -48,7 +48,7 @@ The app uses a **Single Page Application (SPA)** architecture with dynamic page 
 - **Login**: Secure login with session persistence
 - **User Profile**: Navbar displays logged-in user's name, hides Home tab
 - **Logout**: Clean session management, restores default UI
-- **Supabase Integration**: Backend authentication with profiles table
+- **Firebase Integration**: Backend authentication with Cloud Firestore profiles collection
 
 ### 🗺️ **Trip Planner**
 - Create multi-destination itineraries
@@ -114,7 +114,8 @@ The app uses a **Single Page Application (SPA)** architecture with dynamic page 
 - **Google Fonts**: Inter, Playfair Display
 
 ### **Backend & Services**
-- **Supabase**: Authentication, database (PostgreSQL)
+- **Firebase Authentication**: Email/password and Google OAuth sign-in
+- **Cloud Firestore**: NoSQL database for user profiles
 - **REST APIs**: Country data, currency exchange rates
 - **Leaflet.js**: Interactive maps
 
@@ -132,7 +133,6 @@ Globemate2/
 ├── index.html              # Main HTML entry point
 ├── README.md               # This file
 ├── ARCHITECTURE.md         # Detailed architecture documentation
-├── SUPABASE_SETUP.md       # Supabase configuration guide
 ├── .git/                   # Version control
 │
 ├── css/
@@ -175,7 +175,7 @@ Globemate2/
 ### Prerequisites
 - Web browser (Chrome, Firefox, Safari, Edge)
 - Python 3 (for local server) or any static file server
-- Supabase account (for authentication features)
+- Firebase project (for authentication features)
 
 ### Step 1: Clone the Repository
 ```bash
@@ -183,28 +183,36 @@ git clone <repository-url>
 cd Globemate2
 ```
 
-### Step 2: Configure Supabase
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Get your **Project URL** and **Anon Key**
-3. Open `index.html` and update:
+### Step 2: Configure Firebase
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable **Authentication** → Sign-in methods: **Email/Password** and **Google**
+3. Enable **Firestore Database** in production or test mode
+4. Get your Firebase config object from **Project Settings → General → Your apps**
+5. Open `index.html` and update `window.FIREBASE_CONFIG`:
    ```javascript
-   window.SUPABASE_URL = 'YOUR_SUPABASE_URL';
-   window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+   window.FIREBASE_CONFIG = {
+     apiKey: "YOUR_API_KEY",
+     authDomain: "YOUR_PROJECT.firebaseapp.com",
+     projectId: "YOUR_PROJECT_ID",
+     storageBucket: "YOUR_PROJECT.firebasestorage.app",
+     messagingSenderId: "YOUR_SENDER_ID",
+     appId: "YOUR_APP_ID"
+   };
    ```
-4. Create the `profiles` table in Supabase:
-   ```sql
-   CREATE TABLE profiles (
-     id UUID PRIMARY KEY REFERENCES auth.users(id),
-     full_name TEXT,
-     email TEXT,
-     created_at TIMESTAMP DEFAULT NOW()
-   );
+6. The `profiles` collection in Firestore is created automatically on first sign-up. Each document uses the user's **UID** as its ID and contains:
+   ```json
+   {
+     "full_name": "User Name",
+     "email": "user@example.com",
+     "created_at": "ISO timestamp"
+   }
    ```
-5. (Optional) Disable email confirmation for easier testing:
-   - Go to **Authentication > Settings**
-   - Disable "Enable email confirmations"
-
-See [SUPABASE_SETUP.md](SUPABASE_SETUP.md) for detailed instructions.
+7. (Optional) Add a Firestore security rule to restrict profile reads/writes to the owning user:
+   ```
+   match /profiles/{userId} {
+     allow read, write: if request.auth.uid == userId;
+   }
+   ```
 
 ### Step 3: Start Local Server
 ```bash
@@ -225,37 +233,46 @@ python -m http.server 8000
 ## 🔐 Authentication System
 
 ### Architecture
-- **Shared Utility**: `js/auth.js` provides `Auth` object with:
-  - `initSupabase()` - Initialize Supabase client
-  - `signUp(name, email, password)` - Create new user
-  - `login(email, password)` - Authenticate user
-  - `logout()` - Sign out and restore UI
-  - `checkSession()` - Verify existing session on page load
-  - `applyLoggedInUI()` - Update navbar with user name, hide Home
-  - `restoreLoggedOutUI()` - Restore default navbar
+- **Shared Utility**: `js/auth.js` provides a global `Auth` object backed by the **Firebase Auth compat v9 SDK**:
+  - `initFirebase()` — Initialises Firebase app, Auth, and Firestore (called once on script load)
+  - `signUp(name, email, password)` — Creates Firebase user, updates display name, fire-and-forgets Firestore profile write
+  - `login(email, password)` — Authenticates via `signInWithEmailAndPassword`
+  - `signInWithGoogle()` — OAuth popup via `GoogleAuthProvider`, fire-and-forgets Firestore upsert
+  - `logout()` — Calls `auth.signOut()`, restores default UI, redirects to Home
+  - `checkSession()` — Wraps `onAuthStateChanged` in a Promise; resolves immediately with current user or null
+  - `applyLoggedInUI()` — Updates navbar with user's display name, hides Home tab, adds Logout button
+  - `restoreLoggedOutUI()` — Restores default GlobeMate logo and navbar state
 
 ### Registration Flow
 1. User clicks **Register** button on home page
-2. Loads `pages/register.html` (Full Name, Email, Password fields)
-3. `js/register.js` handles form submission
-4. Calls `Auth.signUp()` → creates Supabase user + profile in DB
-5. Updates UI: Navbar shows user name, hides Home, adds Logout
-6. Redirects to **Countries** tab
-7. Background: `img5.jpg` with blur overlay
+2. Loads `pages/register.html` (Full Name, Email, Password, Confirm Password fields)
+3. `js/register.js` validates inputs locally (name required, passwords match, min 8 chars)
+4. Calls `Auth.signUp()` → `firebase.auth().createUserWithEmailAndPassword()`
+5. `updateProfile({ displayName: name })` called asynchronously (non-blocking)
+6. Firestore `profiles/{uid}` document written asynchronously (fire-and-forget — does not block the user)
+7. `Auth.applyLoggedInUI()` updates the navbar immediately
+8. Redirects to **Countries** tab after 300ms toast display
 
 ### Login Flow
-1. User clicks **Log In** button or switches from Register
-2. Loads `pages/login.html` (Email, Password, Remember Me)
+1. User clicks **Log In** button or navigates to the login page
+2. Loads `pages/login.html` (Email, Password fields + Google button)
 3. `js/login.js` handles form submission
-4. Calls `Auth.login()` → verifies credentials
-5. Updates UI same as registration
-6. Redirects to **Countries** tab
+4. Calls `Auth.login()` → `firebase.auth().signInWithEmailAndPassword()`
+5. `Auth.applyLoggedInUI()` updates the navbar immediately
+6. Redirects to **Countries** tab after 300ms toast display
+
+### Google OAuth Flow
+1. User clicks **Continue with Google** on login or register page
+2. `Auth.signInWithGoogle()` triggers `signInWithPopup(new GoogleAuthProvider())`
+3. On success, Firestore profile is upserted with `{ merge: true }` (fire-and-forget)
+4. UI updated and redirected same as email flow
 
 ### Session Persistence
-- On app load (`DOMContentLoaded`), `Auth.checkSession()` runs
-- If session exists, automatically applies logged-in UI
-- User remains logged in across page refreshes
-- Logout clears session and redirects to Home
+- Firebase Auth persists the session in `IndexedDB` automatically (default browser persistence)
+- On app load (`DOMContentLoaded`), `Auth.checkSession()` listens to `onAuthStateChanged` once
+- If a session exists, `applyLoggedInUI()` is called before the first page renders
+- User stays logged in across refreshes without any extra configuration
+- Logout calls `auth.signOut()` which clears the persisted session
 
 ### UI Changes When Logged In
 - **Navbar Logo**: "GlobeMate" → User's name (bold)
@@ -501,13 +518,16 @@ Located in `:root` CSS variables (`styles.css`):
 - **Usage**: Interactive maps with markers
 - **Docs**: [leafletjs.com](https://leafletjs.com)
 
-### Supabase
-- **Purpose**: User authentication & database
+### Firebase
+- **Purpose**: User authentication & NoSQL database
+- **SDK**: Firebase compat v9 (`firebase-app-compat.js`, `firebase-auth-compat.js`, `firebase-firestore-compat.js`) loaded via `gstatic.com` CDN
 - **Features Used**:
-  - Auth: `auth.signUp()`, `auth.signInWithPassword()`, `auth.signOut()`
-  - Database: `profiles` table with user metadata
-  - Session management and persistence
-- **Docs**: [supabase.com/docs](https://supabase.com/docs)
+  - **Auth**: `createUserWithEmailAndPassword`, `signInWithEmailAndPassword`, `signInWithPopup` (Google), `signOut`, `onAuthStateChanged`, `updateProfile`
+  - **Firestore**: `profiles` collection — one document per user keyed by UID, fields: `full_name`, `email`, `created_at`
+  - **Session persistence**: Automatic via Firebase's built-in IndexedDB cache
+- **Config location**: `window.FIREBASE_CONFIG` object in `index.html`
+- **Auth initialised**: Once on script load via `Auth.initFirebase()`; subsequent calls are no-ops
+- **Docs**: [firebase.google.com/docs](https://firebase.google.com/docs)
 
 ---
 
@@ -735,8 +755,8 @@ showToast(message, type)
 
 ### Testing Checklist
 - [ ] All navigation links work
-- [ ] Registration creates user in Supabase
-- [ ] Login persists session across refresh
+- [ ] Registration creates a Firebase Auth user and Firestore profile document
+- [ ] Login persists session across refresh via Firebase IndexedDB persistence
 - [ ] Navbar updates show user name when logged in
 - [ ] Home tab hidden after login
 - [ ] Logout restores default UI
@@ -779,7 +799,7 @@ SOFTWARE.
 
 - **Font Awesome** for comprehensive icon library
 - **Google Fonts** (Inter, Playfair Display) for typography
-- **Supabase** for authentication backend and database
+- **Firebase** for Authentication and Cloud Firestore database
 - **Leaflet.js** for interactive map functionality
 - **REST Countries API** for comprehensive country data
 - **Wikipedia REST API** for historical and cultural information
