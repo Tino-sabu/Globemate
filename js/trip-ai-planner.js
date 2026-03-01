@@ -427,6 +427,76 @@
       font-size: .68rem; font-weight: 700; color: #6d28d9; margin-left: 6px;
     }
 
+    /* slot items (multiple activities per time slot) */
+    .tap-slot-items { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .tap-slot-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: .84rem; color: #0f172a; line-height: 1.5;
+      padding: 4px 0;
+    }
+    .tap-slot-item i {
+      color: #7c3aed; font-size: .65rem; margin-top: 5px; flex-shrink: 0;
+    }
+
+    /* day options (alternative plans) */
+    .tap-day-options {
+      padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .tap-option {
+      border: 1.5px solid #e2e8f0; border-radius: 12px;
+      overflow: hidden; background: #f8fafc;
+      transition: border-color .2s;
+    }
+    .tap-option:hover { border-color: #7c3aed; }
+    .tap-option-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, rgba(124,58,237,.06), rgba(59,130,246,.06));
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 700; font-size: .9rem; color: #1e1b4b;
+    }
+    .tap-option-emoji { font-size: 1.2rem; }
+    .tap-option-label { font-weight: 700; }
+    .tap-option-items {
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .tap-option-divider {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; color: #94a3b8; font-size: .82rem; font-weight: 700;
+      padding: 2px 0;
+    }
+    .tap-option-divider::before,
+    .tap-option-divider::after {
+      content: ''; flex: 1; height: 1px; background: #e2e8f0;
+    }
+
+    /* departure-specific travel tips */
+    .tap-route-card {
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 14px; padding: 20px 22px;
+      margin-bottom: 14px;
+    }
+    .tap-route-title {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: .95rem; color: #1e40af;
+      margin-bottom: 14px;
+    }
+    .tap-route-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .tap-route-item {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 10px 13px; border-radius: 10px;
+      background: #fff; border: 1px solid #e2e8f0;
+      font-size: .84rem; color: #0f172a;
+    }
+    .tap-route-item i { color: #3b82f6; margin-top: 2px; flex-shrink: 0; }
+    .tap-route-item strong { color: #1e1b4b; }
+
     /* responsive */
     @media (max-width: 900px) {
       .tap-layout { grid-template-columns: 1fr; }
@@ -440,6 +510,7 @@
       .tap-slot { flex-direction: column; gap: 5px; }
       .tap-slot-tag { width: auto; }
       .tap-itin-btns { flex-wrap: wrap; }
+      .tap-route-grid { grid-template-columns: 1fr; }
     }
     `;
     document.head.appendChild(style);
@@ -521,6 +592,450 @@
     }
   };
 
+  /* ──────────────────────────────────────────
+     DETAILED DAY-BY-DAY ITINERARIES
+  ────────────────────────────────────────── */
+  const DETAILED_DAYS = {
+    france: [
+      {
+        title: 'Arrival in Paris (Iconic Landmarks)',
+        emoji: '🌅',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Check into hotel & freshen up', 'Visit the Eiffel Tower — go up for panoramic views', 'Walk around Trocadéro Gardens for the classic photo spot'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Seine River Cruise — see illuminated Paris from the water', 'Dinner near the Latin Quarter (try: ratatouille, French onion soup, crème brûlée)'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Art, History & Romance',
+        emoji: '🖼️',
+        slots: [
+          { period: 'morning', emoji: '🎨', label: 'Morning', items: ['Explore the Louvre Museum (book timed-entry ticket)', 'See the Mona Lisa, Venus de Milo & Winged Victory', 'Stroll through the Tuileries Garden'] },
+          { period: 'afternoon', emoji: '🌆', label: 'Afternoon', items: ['Walk through the Montmartre neighbourhood', 'Visit Sacré-Cœur Basilica — stunning city views from the steps', 'Enjoy café hopping & watch street artists at Place du Tertre'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Royal Day Trip',
+        emoji: '👑',
+        options: [
+          { label: 'Option A: Palace of Versailles', emoji: '🏰', items: ['Take the RER C train to Versailles (~40 min)', 'Explore the Hall of Mirrors & Royal Apartments', 'Wander the stunning Royal Gardens', 'Rent a bike or golf cart to explore the Grand Trianon'] },
+          { label: 'Option B: Disneyland Paris', emoji: '🎢', items: ['Take the RER A to Marne-la-Vallée (~45 min)', 'Perfect if traveling with family or kids', 'Enjoy rides, parades & character meet-and-greets', 'Stay for the evening fireworks spectacular'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Scenic France (Choose One Region)',
+        emoji: '🌊',
+        options: [
+          { label: 'Option 1: French Riviera', emoji: '🏖️', items: ['Take a TGV train or fly to Nice (~1 hr flight)', 'Day trip to glamorous Monaco — visit the Casino area', 'Visit the hilltop village of Èze — breathtaking Mediterranean views', 'Enjoy fresh seafood along the Promenade des Anglais'] },
+          { label: 'Option 2: Loire Valley', emoji: '🌿', items: ['Drive or take a tour to the Loire Valley (~2 hrs from Paris)', 'Visit the iconic Château de Chambord', 'Wine tasting at a local vineyard (Vouvray, Sancerre)', 'Scenic cycling routes through rolling countryside'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Culture, Shopping & Farewell',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🏛️', label: 'Morning', items: ['Visit Notre-Dame Cathedral (exterior & Île de la Cité)', 'Walk along the charming streets of Le Marais', 'Browse vintage shops & art galleries'] },
+          { period: 'afternoon', emoji: '🛍️', label: 'Afternoon', items: ['Shop at Galeries Lafayette — don\'t miss the rooftop view', 'Pick up souvenirs along Rue de Rivoli', 'Relax at a classic Parisian café before departure'] }
+        ],
+        stay: false
+      }
+    ],
+    usa: [
+      {
+        title: 'Arrival in the USA — City Vibes',
+        emoji: '🗽',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive & check into your hotel', 'Explore the neighbourhood on foot', 'Grab a classic American burger or deli sandwich'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Walk through Times Square or your city centre', 'Enjoy a rooftop dinner with skyline views'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Iconic Landmarks & Sightseeing',
+        emoji: '🏙️',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Visit the Statue of Liberty & Ellis Island (book ferry in advance)', 'Walk across the Brooklyn Bridge for skyline photos', 'Coffee at a classic NYC coffee shop'] },
+          { period: 'afternoon', emoji: '☀️', label: 'Afternoon', items: ['Explore Central Park — rent a bike or rowboat', 'Visit the Metropolitan Museum of Art', 'Stroll down Fifth Avenue'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Broadway show (book tickets online for best deals)', 'Dinner in Little Italy or Chinatown'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Culture, History & Neighborhoods',
+        emoji: '🎭',
+        slots: [
+          { period: 'morning', emoji: '🎨', label: 'Morning', items: ['Visit the 9/11 Memorial & Museum', 'Walk through Wall Street & Financial District', 'See the Charging Bull statue'] },
+          { period: 'afternoon', emoji: '🌆', label: 'Afternoon', items: ['Explore Greenwich Village & SoHo', 'Browse boutique shops & street art', 'Try New York-style pizza at a legendary pizzeria'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Visit Top of the Rock or Empire State Building at sunset', 'Dinner at a Michelin-recommended restaurant'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Day Trip Adventure',
+        emoji: '🚗',
+        options: [
+          { label: 'Option A: Washington D.C.', emoji: '🏛️', items: ['Take Amtrak or drive to D.C. (~3.5 hrs)', 'Visit the Lincoln Memorial & National Mall', 'Explore the Smithsonian Museums (free entry!)', 'See the White House & Capitol Building'] },
+          { label: 'Option B: Niagara Falls', emoji: '🌊', items: ['Fly or drive to Niagara Falls', 'Take the Maid of the Mist boat ride', 'Walk along the observation decks', 'Enjoy a scenic dinner overlooking the falls'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Shopping, Food & Departure',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Last-minute shopping at outlet stores or local markets', 'Pick up souvenirs & American snacks', 'Enjoy a farewell brunch'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Check out of hotel', 'Head to the airport — allow 3+ hours for international flights', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    japan: [
+      {
+        title: 'Arrival in Tokyo — Neon & Tradition',
+        emoji: '🗼',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive at Narita/Haneda — get a Suica/Pasmo card', 'Check into hotel & freshen up', 'Explore Shinjuku — neon lights & vibrant energy'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dinner at a ramen or sushi restaurant in Shibuya', 'Walk through the famous Shibuya Crossing', 'Visit a Japanese convenience store (konbini) for unique snacks'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Traditional Tokyo & Temples',
+        emoji: '⛩️',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Visit Meiji Shrine — peaceful forest walk in the city', 'Stroll through Harajuku & Takeshita Street', 'Try a Japanese crêpe or matcha treat'] },
+          { period: 'afternoon', emoji: '☀️', label: 'Afternoon', items: ['Explore Asakusa & Senso-ji Temple', 'Walk along Nakamise Shopping Street for souvenirs', 'Take a water bus along the Sumida River'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Visit Tokyo Skytree for panoramic night views', 'Dinner at an izakaya (Japanese pub) — try yakitori & tempura'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Day Trip — Mount Fuji & Lakes',
+        emoji: '🗻',
+        options: [
+          { label: 'Option A: Mt Fuji & Hakone', emoji: '🏔️', items: ['Take the bullet train (Shinkansen) to Odawara (~35 min)', 'Visit Hakone Open-Air Museum', 'Take a pirate ship cruise on Lake Ashi', 'See Mount Fuji from Owakudani volcanic valley'] },
+          { label: 'Option B: Nikko Temples', emoji: '⛩️', items: ['Take a train to Nikko (~2 hrs from Tokyo)', 'Visit the ornate Toshogu Shrine (UNESCO site)', 'Explore Kegon Falls & Lake Chuzenji', 'Enjoy local yuba (tofu skin) cuisine'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Kyoto — Temples, Geishas & Gardens',
+        emoji: '🎎',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Bullet train to Kyoto (~2.5 hrs)', 'Visit Fushimi Inari Shrine — walk through 10,000 torii gates', 'Try matcha & dango at a tea house nearby'] },
+          { period: 'afternoon', emoji: '🎋', label: 'Afternoon', items: ['Walk through Arashiyama Bamboo Forest', 'Visit Tenryu-ji Temple & its stunning garden', 'Cross the Togetsukyo Bridge'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Stroll through the Gion district — spot a geisha', 'Dinner at a traditional kaiseki restaurant', 'Take the bullet train back to Tokyo'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Akihabara, Shopping & Departure',
+        emoji: '🎮',
+        slots: [
+          { period: 'morning', emoji: '🎮', label: 'Morning', items: ['Explore Akihabara — anime, manga & electronics paradise', 'Visit a themed café (cat café, maid café, etc.)', 'Pick up unique Japanese souvenirs & Kit-Kat flavours'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Final sushi lunch at Tsukiji Outer Market', 'Head to the airport — sayonara, Japan! 🇯🇵', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    italy: [
+      {
+        title: 'Arrival in Rome — Eternal City',
+        emoji: '🏛️',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive in Rome & check into hotel', 'Toss a coin in the Trevi Fountain for good luck', 'Walk to the Spanish Steps & Piazza di Spagna'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dinner in Trastevere — the heart of Roman dining', 'Try authentic cacio e pepe, supplì & gelato', 'Evening passeggiata (stroll) through cobblestone streets'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Ancient Rome & Vatican City',
+        emoji: '⚔️',
+        slots: [
+          { period: 'morning', emoji: '🏟️', label: 'Morning', items: ['Visit the Colosseum & Roman Forum (book skip-the-line ticket)', 'Walk along the Palatine Hill for city views', 'See the Arch of Constantine'] },
+          { period: 'afternoon', emoji: '⛪', label: 'Afternoon', items: ['Explore Vatican Museums & the Sistine Chapel', 'Visit St. Peter\'s Basilica — climb to the dome for views', 'Walk through Castel Sant\'Angelo'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dinner near Piazza Navona', 'Try Roman-style pizza al taglio & tiramisu'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Day Trip — Florence or Pompeii',
+        emoji: '🎨',
+        options: [
+          { label: 'Option A: Florence (Firenze)', emoji: '🌻', items: ['High-speed train to Florence (~1.5 hrs)', 'Visit the Uffizi Gallery — see Botticelli\'s Birth of Venus', 'Marvel at the Duomo & climb Brunelleschi\'s dome', 'Cross the Ponte Vecchio & enjoy a Florentine steak'] },
+          { label: 'Option B: Pompeii & Amalfi Coast', emoji: '🌋', items: ['Train to Naples, then Pompeii (~2.5 hrs total)', 'Explore the ancient ruins frozen in time by Vesuvius', 'Continue to the Amalfi Coast for stunning coastal views', 'Try limoncello & fresh seafood in Positano'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Venice — Canals & Romance',
+        emoji: '🚣',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Train to Venice (~3.5 hrs from Rome)', 'Gondola ride through the Grand Canal', 'Visit St. Mark\'s Basilica & the Doge\'s Palace'] },
+          { period: 'afternoon', emoji: '☀️', label: 'Afternoon', items: ['Get lost in Venice\'s charming narrow streets', 'Visit Rialto Bridge & browse local markets', 'Try cicchetti (Venetian tapas) & prosecco'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Watch sunset from Ponte dell\'Accademia', 'Dinner at a canal-side restaurant', 'Train back to Rome'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Last Bites of Italy & Departure',
+        emoji: '🍕',
+        slots: [
+          { period: 'morning', emoji: '☕', label: 'Morning', items: ['Enjoy a classic Italian breakfast — espresso & cornetto', 'Last-minute shopping for leather goods & souvenirs', 'Visit any remaining must-see spots'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Hotel check-out & head to Fiumicino Airport', 'Arrivederci, Italia! Safe travels home! 🇮🇹'] }
+        ],
+        stay: false
+      }
+    ],
+    thailand: [
+      {
+        title: 'Arrival in Bangkok — City of Angels',
+        emoji: '🌅',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive at Suvarnabhumi Airport & get a SIM card', 'Check into hotel & freshen up', 'Visit Khao San Road for backpacker vibes & street food'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dinner at a rooftop bar overlooking the skyline', 'Try pad Thai, mango sticky rice & Thai iced tea', 'Explore the vibrant night markets'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Grand Palace, Temples & Culture',
+        emoji: '🏯',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Visit the Grand Palace & Wat Phra Kaew (Temple of the Emerald Buddha)', 'Explore nearby Wat Pho — home of the giant Reclining Buddha', 'Dress modestly — shoulders & knees must be covered'] },
+          { period: 'afternoon', emoji: '🛶', label: 'Afternoon', items: ['Long-tail boat ride through Bangkok\'s canals (klongs)', 'Visit Wat Arun (Temple of Dawn) across the river', 'Explore Chinatown & try street food at Yaowarat Road'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Visit Asiatique The Riverfront night market', 'Enjoy a traditional Thai cultural performance', 'Try tom yum soup & green curry at a local restaurant'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Floating Markets & Day Trip',
+        emoji: '🛶',
+        options: [
+          { label: 'Option A: Floating Markets', emoji: '🛶', items: ['Early morning trip to Damnoen Saduak Floating Market', 'Sample fresh tropical fruits & coconut pancakes from boats', 'Visit the Railway Market (Maeklong) — trains pass through!', 'Return to Bangkok for an evening Thai massage'] },
+          { label: 'Option B: Ayutthaya Ancient City', emoji: '🏛️', items: ['Day trip to Ayutthaya (~1.5 hrs from Bangkok)', 'Explore ancient temple ruins (UNESCO World Heritage Site)', 'See the famous Buddha head entwined in tree roots', 'Enjoy a river cruise back to Bangkok'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Beach Paradise — Islands',
+        emoji: '🏝️',
+        options: [
+          { label: 'Option 1: Phi Phi Islands', emoji: '🏖️', items: ['Fly to Phuket or Krabi (~1.5 hrs)', 'Speedboat to Phi Phi Islands — crystal-clear waters', 'Snorkelling, kayaking & Maya Bay visit', 'Beach BBQ dinner under the stars'] },
+          { label: 'Option 2: Chiang Mai (Mountains)', emoji: '🐘', items: ['Fly to Chiang Mai (~1.5 hrs from Bangkok)', 'Visit an ethical elephant sanctuary', 'Explore Doi Suthep temple on the mountain', 'Night Bazaar shopping & local khao soi noodle soup'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Last Adventures & Departure',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Visit Chatuchak Weekend Market (15,000+ stalls!)', 'Pick up Thai silk, handicrafts & spices as souvenirs', 'Enjoy a final Thai massage'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Last street food feast — satay, pad see ew & mango sticky rice', 'Head to the airport — khob khun kha, Thailand! 🇹🇭', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    uk: [
+      {
+        title: 'Arrival in London — Royal Welcome',
+        emoji: '🇬🇧',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive at Heathrow — get an Oyster card for the Tube', 'Check into hotel & freshen up', 'Walk along the South Bank — see the London Eye'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Classic fish & chips dinner by the Thames', 'See Big Ben & the Houses of Parliament illuminated', 'Walk across Westminster Bridge for night photos'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Royal London & Museums',
+        emoji: '👑',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Watch the Changing of the Guard at Buckingham Palace', 'Walk through St. James\'s Park & Green Park', 'Visit the Tower of London — see the Crown Jewels'] },
+          { period: 'afternoon', emoji: '🏛️', label: 'Afternoon', items: ['Explore the British Museum (free entry!)', 'Walk through Covent Garden for street performers', 'Afternoon tea at a classic London tearoom'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['West End theatre show (book in advance)', 'Dinner in Soho — try a Sunday roast or shepherd\'s pie'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Day Trip — Castles & Countryside',
+        emoji: '🏰',
+        options: [
+          { label: 'Option A: Stonehenge & Bath', emoji: '🪨', items: ['Day trip to Stonehenge (~2 hrs from London)', 'Marvel at the ancient stone circle (5,000 years old!)', 'Continue to Bath — visit the Roman Baths', 'Enjoy a cream tea in the charming city centre'] },
+          { label: 'Option B: Oxford & Cotswolds', emoji: '📚', items: ['Train to Oxford (~1 hr from London)', 'Walk through the ancient university colleges', 'Visit the Bodleian Library & Radcliffe Camera', 'Explore honey-stone Cotswolds villages nearby'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'East London, Markets & Culture',
+        emoji: '🎨',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Explore Borough Market — foodie paradise', 'Walk across Tower Bridge for Thames views', 'Visit the Tate Modern gallery (free entry)'] },
+          { period: 'afternoon', emoji: '🎨', label: 'Afternoon', items: ['Explore Camden Town & Camden Market', 'Browse vintage shops & street art in Shoreditch', 'Visit the Harry Potter Platform 9¾ at King\'s Cross'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Cruise along Regent\'s Canal', 'Dinner at a traditional British pub', 'Walk through Piccadilly Circus at night'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Shopping, Parks & Farewell',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Shopping on Oxford Street & Regent Street', 'Visit Harrods in Knightsbridge', 'Relax in Hyde Park'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Last photo stops & souvenir shopping', 'Head to the airport — cheerio, London! 🇬🇧', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    germany: [
+      {
+        title: 'Arrival in Berlin — History & Vibes',
+        emoji: '🇩🇪',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive in Berlin & check into hotel', 'Visit the Brandenburg Gate — iconic symbol of Germany', 'Walk along Unter den Linden boulevard'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dinner at a traditional German beer hall', 'Try bratwurst, pretzels & a cold German lager', 'Explore the vibrant Kreuzberg neighbourhood'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Berlin Wall, Museums & Culture',
+        emoji: '🧱',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Visit the East Side Gallery — longest surviving section of the Berlin Wall', 'Explore the Topography of Terror museum', 'See Checkpoint Charlie'] },
+          { period: 'afternoon', emoji: '🏛️', label: 'Afternoon', items: ['Museum Island — visit the Pergamon Museum', 'Walk through the Berlin Cathedral', 'Coffee & cake at a Berlin café (try Bienenstich)'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Visit the Reichstag building — book the glass dome tour', 'Dinner in Prenzlauer Berg neighbourhood', 'Experience Berlin\'s famous nightlife scene'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Bavarian Adventure',
+        emoji: '🏔️',
+        options: [
+          { label: 'Option A: Neuschwanstein Castle', emoji: '🏰', items: ['Fly or train to Munich (~4 hrs)', 'Day trip to Neuschwanstein Castle — the fairytale castle', 'Hike up to Marienbrücke bridge for the best views', 'Return to Munich for a Bavarian dinner'] },
+          { label: 'Option B: Munich City Day', emoji: '🍺', items: ['Train to Munich & explore Marienplatz', 'Watch the Glockenspiel clock performance', 'Visit the famous Hofbräuhaus beer hall', 'Tour the English Garden — one of the world\'s largest urban parks'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Rhine Valley & Romance',
+        emoji: '🏞️',
+        slots: [
+          { period: 'morning', emoji: '🚂', label: 'Morning', items: ['Train to the Rhine Valley region', 'Rhine River cruise past medieval castles & vineyards', 'Visit the Lorelei Rock viewpoint'] },
+          { period: 'afternoon', emoji: '🍷', label: 'Afternoon', items: ['Wine tasting at a Riesling vineyard', 'Explore the charming town of Bacharach or Rüdesheim', 'Try local schnitzel & Black Forest cake'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Return to Berlin or your base city', 'Farewell dinner at a cosy German restaurant'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Last Day & Departure',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Visit KaDeWe department store for souvenirs', 'Last currywurst from a street stall', 'Final photo walk through the city'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Check out & head to the airport', 'Auf Wiedersehen, Deutschland! 🇩🇪', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    singapore: [
+      {
+        title: 'Arrival in the Lion City',
+        emoji: '🦁',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive at Changi Airport (one of the world\'s best!)', 'Check into hotel & freshen up', 'Walk around Marina Bay — see the Merlion statue'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Gardens by the Bay — Supertree Grove light show (free!)', 'Dinner at a hawker centre — try Hainanese chicken rice & laksa', 'Walk along the Marina Bay Sands promenade'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Cultural Quarters & Cuisine',
+        emoji: '🏮',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Explore Chinatown — visit the Buddha Tooth Relic Temple', 'Walk through colourful Haji Lane in Kampong Glam', 'Try kaya toast & kopi at a traditional coffee shop'] },
+          { period: 'afternoon', emoji: '🎨', label: 'Afternoon', items: ['Visit Little India — Sri Veeramakaliamman Temple', 'Browse Mustafa Centre for bargain shopping', 'Try roti prata & fish head curry'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Clarke Quay riverside dining & nightlife', 'Singapore Sling cocktail at Raffles Hotel Long Bar', 'Night Safari at Singapore Zoo (unique experience!)'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Thrills & Entertainment',
+        emoji: '🎢',
+        options: [
+          { label: 'Option A: Sentosa Island', emoji: '🏝️', items: ['Universal Studios Singapore — rides & shows all day', 'Visit S.E.A. Aquarium — one of the world\'s largest', 'Relax at Palawan Beach', 'Wings of Time evening show on the beach'] },
+          { label: 'Option B: Nature & Wildlife', emoji: '🌿', items: ['Singapore Zoo — world-famous open-concept zoo', 'River Wonders — giant panda exhibit', 'MacRitchie Treetop Walk through the rainforest canopy', 'Botanical Gardens — UNESCO World Heritage Site'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Shopping, Views & Hidden Gems',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Shop on Orchard Road — Singapore\'s shopping paradise', 'Visit ION Orchard & Design Orchard for local brands'] },
+          { period: 'afternoon', emoji: '🌆', label: 'Afternoon', items: ['Marina Bay Sands SkyPark observation deck', 'Visit ArtScience Museum for immersive exhibitions', 'Try chilli crab at a waterfront restaurant'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Spectra light & water show at Marina Bay (free!)', 'Rooftop cocktails at CÉ LA VI', 'Night walk along the Helix Bridge'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Final Flavours & Departure',
+        emoji: '✈️',
+        slots: [
+          { period: 'morning', emoji: '☕', label: 'Morning', items: ['Final hawker centre breakfast — nasi lemak & teh tarik', 'Pick up souvenirs at Changi Airport\'s Jewel mall', 'Slide down the Rain Vortex waterfall at Jewel!'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Head to the airport — xie xie, Singapore! 🇸🇬', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ],
+    uae: [
+      {
+        title: 'Arrival in Dubai — City of Gold',
+        emoji: '🌇',
+        slots: [
+          { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: ['Arrive in Dubai & check into hotel', 'Visit Dubai Mall — the world\'s largest shopping mall', 'See the Dubai Aquarium & Underwater Zoo inside the mall'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Watch the Dubai Fountain show (every 30 mins, free!)', 'Visit Burj Khalifa observation deck At The Top (book online)', 'Dinner with views of the illuminated skyline'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Old Dubai, Souks & Culture',
+        emoji: '🕌',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: ['Visit Al Fahidi Historical District — old Dubai charm', 'Take an abra (water taxi) across Dubai Creek', 'Explore the Gold Souk & Spice Souk in Deira'] },
+          { period: 'afternoon', emoji: '🕌', label: 'Afternoon', items: ['Visit Jumeirah Mosque (one of few open to non-Muslims)', 'Walk along Jumeirah Beach with Burj Al Arab views', 'Try authentic shawarma & Arabic coffee'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Desert Safari — dune bashing, camel ride & BBQ dinner', 'Watch a belly dance performance under the stars', 'Try Arabic sweets — luqaimat & kunafa'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Abu Dhabi Day Trip',
+        emoji: '🕌',
+        options: [
+          { label: 'Option A: Sheikh Zayed Mosque & Culture', emoji: '🕌', items: ['Drive to Abu Dhabi (~1.5 hrs)', 'Visit the stunning Sheikh Zayed Grand Mosque', 'Explore the Louvre Abu Dhabi — a masterpiece of architecture', 'Walk along the Corniche waterfront promenade'] },
+          { label: 'Option B: Theme Park Adventure', emoji: '🎢', items: ['Visit Ferrari World — ride the world\'s fastest roller coaster', 'Explore Yas Waterworld — perfect for families', 'Warner Bros World — indoor theme park', 'Dinner on Yas Island'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Luxury, Beaches & Adventure',
+        emoji: '🏝️',
+        slots: [
+          { period: 'morning', emoji: '🏖️', label: 'Morning', items: ['Visit Palm Jumeirah — take the monorail', 'Explore Atlantis, The Palm — Aquaventure Waterpark', 'Relax on the beach with Burj Al Arab views'] },
+          { period: 'afternoon', emoji: '🛍️', label: 'Afternoon', items: ['Visit Mall of the Emirates — ski at Ski Dubai (indoor!)', 'Browse the Global Village (seasonal)', 'Try Emirati machboos & lamb ouzi'] },
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: ['Dubai Marina walk & dinner at a waterfront restaurant', 'Take a dhow cruise along the Marina', 'Enjoy the JBR Beach Walk nightlife'] }
+        ],
+        stay: true
+      },
+      {
+        title: 'Last Souvenirs & Departure',
+        emoji: '🛍️',
+        slots: [
+          { period: 'morning', emoji: '🛍️', label: 'Morning', items: ['Last-minute shopping for gold, perfumes & dates', 'Visit a local café for a final Arabic coffee & kunafa', 'Take farewell photos'] },
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: ['Check out & head to Dubai International Airport', 'Ma\'a salama, Dubai! 🇦🇪', 'Safe travels home! ✈️'] }
+        ],
+        stay: false
+      }
+    ]
+  };
+
   function getFacts(name) {
     if (!name) return DB.default;
     const k = name.toLowerCase().trim();
@@ -528,6 +1043,15 @@
       if (k.includes(key) || key.includes(k)) return DB[key];
     }
     return DB.default;
+  }
+
+  function getDetailedDays(name) {
+    if (!name) return null;
+    const k = name.toLowerCase().trim();
+    for (const key of Object.keys(DETAILED_DAYS)) {
+      if (k.includes(key) || key.includes(k)) return DETAILED_DAYS[key];
+    }
+    return null;
   }
 
   /* ──────────────────────────────────────────
@@ -620,7 +1144,8 @@
     const purpose  = prefs.purpose || 'tourism';
     const isHoney  = /honeymoon|romance/i.test(purpose);
     const isBiz    = /business|work/i.test(purpose);
-    const isAdv    = /adventure|outdoor/i.test(purpose) || (prefs.interests || []).some(i => /adventure|outdoor/i.test(i));
+    const interestsList = Array.isArray(prefs.interests) ? prefs.interests : (prefs.interests || '').split(',').map(s => s.trim()).filter(Boolean);
+    const isAdv    = /adventure|outdoor/i.test(purpose) || interestsList.some(i => /adventure|outdoor/i.test(i));
 
     let out = '';
 
@@ -680,22 +1205,42 @@
       out += `<div class="tap-day">
         <div class="tap-day-hdr">
           <div class="tap-day-num">Day ${i+1}</div>
-          <div class="tap-day-ti">${day.title}</div>
+          <div class="tap-day-ti">${day.emoji ? day.emoji + ' ' : ''}${day.title}</div>
           ${dateStr ? `<div class="tap-day-dt">${dateStr}</div>` : ''}
-        </div>
-        <div class="tap-day-body">`;
-      ['morning','afternoon','evening'].forEach(slot => {
-        const s = day[slot];
-        out += `<div class="tap-slot">
-          <div class="tap-slot-tag ${slot}"><i class="fas fa-${slot==='morning'?'sun':slot==='afternoon'?'cloud-sun':'moon'}"></i> ${slot.charAt(0).toUpperCase()+slot.slice(1)}</div>
-          <div>
-            <p class="tap-slot-act">${s.activity}</p>
-            <p class="tap-slot-det">${s.detail}</p>
-            ${s.tip ? `<p class="tap-slot-tip"><i class="fas fa-lightbulb"></i> ${s.tip}</p>` : ''}
-          </div>
         </div>`;
-      });
-      out += `</div>`;
+
+      // Render time-of-day slots (morning/afternoon/evening with multiple activities)
+      if (day.slots && day.slots.length) {
+        out += `<div class="tap-day-body">`;
+        day.slots.forEach(slot => {
+          const pc = slot.period || 'morning';
+          out += `<div class="tap-slot">
+            <div class="tap-slot-tag ${pc}"><i class="fas fa-${pc==='morning'?'sun':pc==='afternoon'?'cloud-sun':'moon'}"></i> ${slot.emoji || ''} ${slot.label || pc.charAt(0).toUpperCase()+pc.slice(1)}</div>
+            <div class="tap-slot-items">`;
+          slot.items.forEach(item => {
+            out += `<div class="tap-slot-item"><i class="fas fa-chevron-right"></i> ${item}</div>`;
+          });
+          out += `</div></div>`;
+        });
+        out += `</div>`;
+      }
+
+      // Render option-based days (alternative plans)
+      if (day.options && day.options.length) {
+        out += `<div class="tap-day-options">`;
+        day.options.forEach((opt, oi) => {
+          if (oi > 0) out += `<div class="tap-option-divider">OR</div>`;
+          out += `<div class="tap-option">
+            <div class="tap-option-header">${opt.emoji ? '<span class="tap-option-emoji">' + opt.emoji + '</span>' : ''}<span class="tap-option-label">${opt.label}</span></div>
+            <div class="tap-option-items">`;
+          opt.items.forEach(item => {
+            out += `<div class="tap-slot-item"><i class="fas fa-chevron-right"></i> ${item}</div>`;
+          });
+          out += `</div></div>`;
+        });
+        out += `</div>`;
+      }
+
       if (day.stay) {
         out += `<div class="tap-day-stay">
           <i class="fas fa-bed"></i>
@@ -730,6 +1275,20 @@
     pack.forEach(p => out += `<div class="tap-pack-item"><i class="fas fa-check-circle"></i>${p}</div>`);
     out += `</div>`;
 
+    // ── Departure-Specific Travel Tips ──
+    const depCity = (trip.departureCity || '').trim();
+    if (depCity) {
+      const routeTips = getDepartureTips(depCity, dest, facts, trip.travelMode);
+      out += `<div class="tap-sec-label"><i class="fas fa-plane-departure"></i> ✈️ Travel Tips (From ${depCity})</div>
+      <div class="tap-route-card">
+        <div class="tap-route-title"><i class="fas fa-route"></i> Since you're in ${depCity}:</div>
+        <div class="tap-route-grid">`;
+      routeTips.forEach(tip => {
+        out += `<div class="tap-route-item"><i class="fas fa-${tip.icon}"></i><div><strong>${tip.label}:</strong> ${tip.value}</div></div>`;
+      });
+      out += `</div></div>`;
+    }
+
     // ── Tips ──
     out += `<div class="tap-sec-label"><i class="fas fa-info-circle"></i> AI Travel Tips</div>
     <ul class="tap-tips-ul">
@@ -740,6 +1299,8 @@
       <li><i class="fas fa-bolt"></i> Carry some <strong>${facts.currency}</strong> cash for local markets &amp; taxis.</li>
       <li><i class="fas fa-bolt"></i> Emergency helpline in ${dest}: <strong>${facts.sos}</strong></li>
       <li><i class="fas fa-bolt"></i> Always purchase travel insurance — it's essential, not optional.</li>
+      <li><i class="fas fa-bolt"></i> Buy attraction tickets (museums, monuments) online in advance to skip queues.</li>
+      <li><i class="fas fa-bolt"></i> Use public transport passes for cost-effective city travel.</li>
       ${prefs.dietary && prefs.dietary !== 'None' ? `<li><i class="fas fa-bolt"></i> Carry a dietary card translated to <strong>${facts.language}</strong> for <strong>${prefs.dietary}</strong> needs.</li>` : ''}
     </ul>`;
 
@@ -748,39 +1309,141 @@
 
   /* ── Day plan builder helper ── */
   function makeDayPlans(dest, days, facts, prefs, purpose, tier, accom, isHoney, isBiz, isAdv) {
-    const places = [...facts.places];
-    const food = [...facts.food];
+    const detailed = getDetailedDays(dest);
+
+    if (detailed && detailed.length > 0) {
+      return buildFromDetailed(detailed, dest, days, facts, prefs, purpose, tier, accom, isHoney, isBiz, isAdv);
+    }
+    return buildGenericPlan(dest, days, facts, prefs, purpose, tier, accom, isHoney, isBiz, isAdv);
+  }
+
+  function buildFromDetailed(detailed, dest, days, facts, prefs, purpose, tier, accom, isHoney, isBiz, isAdv) {
     const plans = [];
+
+    // Day 1: always the arrival template
+    plans.push({ ...detailed[0], stay: detailed[0].stay !== false });
+
+    // Middle days: pick from detailed templates (indices 1 to n-2)
+    const middleTemplates = detailed.slice(1, detailed.length - 1);
+    const middleDaysNeeded = Math.max(0, days - 2);
+    const places = [...facts.places];
+    const food   = [...facts.food];
+
+    for (let i = 0; i < middleDaysNeeded; i++) {
+      if (i < middleTemplates.length) {
+        plans.push({ ...middleTemplates[i], stay: middleTemplates[i].stay !== false });
+      } else {
+        // Generate extra days from facts data for longer trips
+        const pi = (i - middleTemplates.length) * 2;
+        const p1 = places[pi % places.length] || `${dest} Attraction`;
+        const p2 = places[(pi + 1) % places.length] || `Local Exploration`;
+        const meal = food[i % food.length] || 'local cuisine';
+        const themes = ['Hidden Gems & Local Life', 'Nature & Scenic Exploration', 'Cultural Immersion', 'Leisure & Relaxation'];
+        const emojis = ['🗺️', '🌿', '🎭', '☀️'];
+        const idx = (i - middleTemplates.length) % themes.length;
+
+        plans.push({
+          title: themes[idx], emoji: emojis[idx],
+          slots: [
+            { period: 'morning', emoji: '🌅', label: 'Morning', items: [
+              `Visit ${p1}`, 'Explore the surrounding area & take photos',
+              isHoney ? 'Leisurely couples breakfast at a scenic spot' : isBiz ? 'Morning meetings or networking' : 'Grab breakfast at a beloved local café'
+            ]},
+            { period: 'afternoon', emoji: '☀️', label: 'Afternoon', items: [
+              `Head to ${p2}`, `Lunch at a local spot — try ${meal}`,
+              'Browse local markets & pick up souvenirs'
+            ]},
+            { period: 'evening', emoji: '🌙', label: 'Evening', items: [
+              isHoney ? 'Romantic dinner at a rooftop restaurant' : isAdv ? 'Night excursion or adventure activity' : 'Enjoy local nightlife or a cultural performance',
+              'Return to hotel & rest for the next day'
+            ]}
+          ],
+          stay: true
+        });
+      }
+    }
+
+    // Last day: departure
+    if (days > 1) {
+      const lastTmpl = detailed[detailed.length - 1];
+      if (days <= detailed.length && lastTmpl) {
+        plans.push({ ...lastTmpl, stay: false });
+      } else {
+        plans.push({
+          title: 'Final Memories & Departure', emoji: '✈️',
+          slots: [
+            { period: 'morning', emoji: '🌅', label: 'Morning', items: [
+              'Enjoy a final breakfast at your favourite café',
+              'Last-minute souvenir shopping',
+              'Take final photos & soak in the atmosphere'
+            ]},
+            { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: [
+              'Hotel check-out & head to the airport / station',
+              'Allow at least 3 hours for international flights',
+              'Journey home — safe travels! ✈️'
+            ]}
+          ],
+          stay: false
+        });
+      }
+    }
+
+    return plans.slice(0, days);
+  }
+
+  function buildGenericPlan(dest, days, facts, prefs, purpose, tier, accom, isHoney, isBiz, isAdv) {
+    const places = [...facts.places];
+    const food   = [...facts.food];
+    const plans  = [];
 
     // Day 1 — Arrival
     plans.push({
-      title: `Arrival & First Impressions of ${dest}`,
-      morning:   { activity: `Depart & Travel to ${dest}`, detail: `Board your transport, arrive and freshen up. Exchange some local currency at the airport.`, tip: 'Download offline maps & currency app before you board.' },
-      afternoon: { activity: `Hotel Check-in & Rest`,      detail: `Check into ${accom.name}. Explore the nearby streets and grab a light snack.`, tip: null },
-      evening:   { activity: `Welcome Dinner`,             detail: `Dine at a local restaurant — try ${food[0] || 'local cuisine'}. Take a relaxed evening walk.`, tip: `Ask hotel staff for hidden local dining gems.` },
+      title: `Arrival & First Impressions of ${dest}`, emoji: '🌅',
+      slots: [
+        { period: 'afternoon', emoji: '🌅', label: 'Afternoon', items: [
+          `Arrive in ${dest} & check into ${accom.name}`,
+          'Exchange some local currency at the airport',
+          'Explore the nearby streets & get oriented'
+        ]},
+        { period: 'evening', emoji: '🌙', label: 'Evening', items: [
+          `Welcome dinner — try ${food[0] || 'local cuisine'}`,
+          'Take a relaxed evening walk around the neighbourhood',
+          'Ask hotel staff for hidden local dining gems'
+        ]}
+      ],
       stay: true
     });
 
-    const themeTitles = [
-      'Major Landmarks & History', 'Food, Markets & Local Life',
-      'Day Trip & Scenic Beauty',   'Adventure & Outdoor Exploration',
-      'Culture, Arts & Museums',    'Shopping & Relaxation',
-      'Hidden Gems & Neighbourhood Walks'
-    ];
+    const themeTitles = ['Major Landmarks & History', 'Food, Markets & Local Life', 'Day Trip & Scenic Beauty', 'Adventure & Outdoor Exploration', 'Culture, Arts & Museums', 'Shopping & Relaxation', 'Hidden Gems & Neighbourhood Walks'];
+    const themeEmojis = ['🏛️', '🍜', '🌄', '🏔️', '🎭', '🛍️', '🗺️'];
 
     for (let d = 2; d <= Math.max(days - 1, 2); d++) {
       const p1 = places.shift() || `${dest} Landmark`;
       const p2 = places.shift() || `${dest} Attraction`;
       const meal = food.shift() || 'local cuisine';
-      const title = isBiz ? (d===2 ? 'Business Meetings & City Centre' : themeTitles[(d-2) % themeTitles.length]) :
-                    isHoney ? (d===2 ? 'Romance, Fine Dining & Scenic Views' : themeTitles[(d-2) % themeTitles.length]) :
-                    themeTitles[(d-2) % themeTitles.length];
+      const ti = (d - 2) % themeTitles.length;
+      const title = isBiz && d === 2 ? 'Business Meetings & City Centre' :
+                    isHoney && d === 2 ? 'Romance, Fine Dining & Scenic Views' :
+                    themeTitles[ti];
 
       plans.push({
-        title,
-        morning:   { activity: `Visit ${p1}`, detail: `Start early to beat the crowds. ${isBiz ? 'Attend morning meetings.' : isHoney ? 'Explore together at a relaxed pace.' : 'Hire a local guide for deeper insight.'}`, tip: 'Pre-book tickets online to skip queues.' },
-        afternoon: { activity: `${p2} + Lunch`, detail: `Grab ${meal} at a well-rated local spot. Explore the area, browse local markets.`, tip: tier==='budget' ? 'Street food stalls offer great value & taste.' : null },
-        evening:   { activity: isHoney ? 'Rooftop / Candlelight Dinner' : isBiz ? 'Business Networking / Free Evening' : isAdv ? 'Night Excursion or Cultural Show' : 'Local Night Life or Cultural Performance', detail: `${isHoney ? `Enjoy a romantic dinner with a view — unforgettable for both of you.` : isBiz ? `Review tomorrow's agenda or attend local networking event.` : `Soak in the local culture and nightlife atmosphere.`}`, tip: null },
+        title, emoji: themeEmojis[ti],
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: [
+            `Visit ${p1}`, 'Start early to beat the crowds',
+            isBiz ? 'Attend morning meetings' : isHoney ? 'Explore together at a relaxed pace' : 'Hire a local guide for deeper insight',
+            'Pre-book tickets online to skip queues'
+          ]},
+          { period: 'afternoon', emoji: '☀️', label: 'Afternoon', items: [
+            `Explore ${p2}`, `Lunch — try ${meal} at a well-rated local spot`,
+            'Browse local markets & artisan shops',
+            ...(tier === 'budget' ? ['💡 Tip: Street food stalls offer great value & taste'] : [])
+          ]},
+          { period: 'evening', emoji: '🌙', label: 'Evening', items: [
+            isHoney ? 'Rooftop or candlelight dinner with views' : isBiz ? 'Business networking event or free evening' : isAdv ? 'Night excursion or cultural show' : 'Local nightlife or cultural performance',
+            'Soak in the local atmosphere & people-watch'
+          ]}
+        ],
         stay: true
       });
     }
@@ -788,10 +1451,19 @@
     // Last day
     if (days > 1) {
       plans.push({
-        title: `Final Memories & Departure`,
-        morning:   { activity: `Breakfast & Final Stroll`,   detail: `Enjoy a last meal at a favourite café. Pick up souvenirs and gifts.`, tip: null },
-        afternoon: { activity: `Hotel Check-out & Departure`, detail: `Settle the bill and head to the airport / station. Allow at least 3 hours for international flights.`, tip: 'Keep your passport and boarding pass accessible.' },
-        evening:   { activity: `Journey Home`,               detail: `Board your transport. Reflect on a wonderful trip — safe travels! ✈️`, tip: null },
+        title: 'Final Memories & Departure', emoji: '✈️',
+        slots: [
+          { period: 'morning', emoji: '🌅', label: 'Morning', items: [
+            'Enjoy a last meal at a favourite café',
+            'Pick up souvenirs & gifts for loved ones',
+            'Take final photos of the city'
+          ]},
+          { period: 'afternoon', emoji: '✈️', label: 'Afternoon', items: [
+            'Hotel check-out & head to the airport / station',
+            'Allow at least 3 hours for international flights',
+            'Board your transport — safe travels! ✈️'
+          ]}
+        ],
         stay: false
       });
     }
@@ -809,6 +1481,79 @@
       ...(/business/i.test(purpose) ? ['Business attire & cards','Laptop & charger'] : []),
       ...(/honeymoon|romance/i.test(purpose) ? ['Special occasion outfit','Camera for memories'] : []),
     ];
+  }
+
+  /* ── Departure-specific travel tips ── */
+  function getDepartureTips(depCity, dest, facts, mode) {
+    const dep = depCity.toLowerCase();
+    const tips = [];
+
+    // Determine likely hub/route based on Indian cities
+    const indianCities = {
+      'mumbai': { hub: 'Mumbai (BOM)', routes: ['Mumbai → Dubai/Doha → ', 'Mumbai direct → '] },
+      'delhi': { hub: 'Delhi (DEL)', routes: ['Delhi → Dubai/Abu Dhabi → ', 'Delhi direct → '] },
+      'bangalore': { hub: 'Bangalore (BLR)', routes: ['Bangalore → Singapore/Dubai → ', 'Bangalore direct → '] },
+      'bengaluru': { hub: 'Bangalore (BLR)', routes: ['Bangalore → Singapore/Dubai → ', 'Bangalore direct → '] },
+      'chennai': { hub: 'Chennai (MAA)', routes: ['Chennai → Singapore/Kuala Lumpur → ', 'Chennai → Dubai → '] },
+      'hyderabad': { hub: 'Hyderabad (HYD)', routes: ['Hyderabad → Dubai/Doha → ', 'Hyderabad direct → '] },
+      'kolkata': { hub: 'Kolkata (CCU)', routes: ['Kolkata → Bangkok/Singapore → ', 'Kolkata → Dubai → '] },
+      'kochi': { hub: 'Kochi (COK)', routes: ['Kochi → Dubai/Doha → ', 'Kochi → Abu Dhabi → '] },
+      'calicut': { hub: 'Calicut (CCJ)', routes: ['Calicut → Dubai/Doha → ', 'Calicut → Abu Dhabi → '] },
+      'kozhikode': { hub: 'Calicut (CCJ)', routes: ['Calicut → Dubai/Doha → ', 'Calicut → Abu Dhabi → '] },
+      'trivandrum': { hub: 'Trivandrum (TRV)', routes: ['Trivandrum → Dubai/Colombo → ', 'Trivandrum → Abu Dhabi → '] },
+      'goa': { hub: 'Goa (GOI)', routes: ['Goa → Mumbai/Dubai → ', 'Goa → Doha → '] },
+      'pune': { hub: 'Pune (PNQ)', routes: ['Pune → Dubai → ', 'Pune → Mumbai → '] },
+      'ahmedabad': { hub: 'Ahmedabad (AMD)', routes: ['Ahmedabad → Dubai/Doha → ', 'Ahmedabad → Mumbai → '] },
+      'jaipur': { hub: 'Jaipur (JAI)', routes: ['Jaipur → Dubai → ', 'Jaipur → Delhi → '] },
+      'lucknow': { hub: 'Lucknow (LKO)', routes: ['Lucknow → Dubai/Doha → ', 'Lucknow → Delhi → '] },
+    };
+
+    // Find matching city
+    let cityData = null;
+    for (const [key, val] of Object.entries(indianCities)) {
+      if (dep.includes(key) || key.includes(dep)) { cityData = val; break; }
+    }
+
+    if (cityData) {
+      tips.push({ icon: 'route', label: 'Best route', value: `${cityData.routes[0]}${dest}` });
+    } else {
+      tips.push({ icon: 'route', label: 'Best route', value: `${depCity} → nearest hub → ${dest}` });
+    }
+
+    tips.push({ icon: 'calendar-alt', label: 'Ideal months', value: facts.best });
+    tips.push({ icon: 'ticket-alt', label: 'Pro tip', value: `Buy attraction tickets online in advance to skip long queues` });
+
+    // Mode-specific tip
+    if (mode === 'flight' || !mode) {
+      tips.push({ icon: 'plane', label: 'Flight tip', value: 'Book 6–8 weeks early for best fares. Use Skyscanner or Google Flights.' });
+    } else if (mode === 'train') {
+      tips.push({ icon: 'train', label: 'Train tip', value: 'Get a rail pass if available (e.g., Eurail, JR Pass) for savings.' });
+    }
+
+    // Visa tip
+    tips.push({ icon: 'id-card', label: 'Visa', value: `${facts.visa} — apply well in advance` });
+
+    // Currency
+    tips.push({ icon: 'coins', label: 'Currency', value: `${facts.currency} — carry some cash + international debit/credit card` });
+
+    // Local transport
+    const transportTips = {
+      france: 'Use Paris Metro pass (Navigo) — very efficient & cost-effective!',
+      japan: 'Get a Suica/Pasmo IC card for trains & convenience stores.',
+      uk: 'Get an Oyster card or use contactless for the London Tube.',
+      italy: 'Book Trenitalia/Italo trains in advance for intercity travel.',
+      germany: 'Get a Deutschland-Ticket for unlimited regional train travel.',
+      thailand: 'Use BTS Skytrain & MRT in Bangkok. Grab/Bolt for taxis.',
+      singapore: 'Get an EZ-Link card for MRT & buses — very easy to use.',
+      uae: 'Get a Nol card for Dubai Metro. Taxis are affordable too.',
+      usa: 'Get a MetroCard (NYC) or use ride-sharing apps (Uber/Lyft).',
+    };
+    const tKey = Object.keys(transportTips).find(k => dest.toLowerCase().includes(k));
+    if (tKey) {
+      tips.push({ icon: 'subway', label: 'Local transport', value: transportTips[tKey] });
+    }
+
+    return tips;
   }
 
   /* ──────────────────────────────────────────
@@ -1167,22 +1912,27 @@
     },
 
     showItinerary() {
-      const html    = generateItinerary(this.trip, this.prefs);
-      this.generatedHTML = html;
+      try {
+        const html    = generateItinerary(this.trip, this.prefs);
+        this.generatedHTML = html;
 
-      const card    = document.getElementById('tapItinCard');
-      const body    = document.getElementById('tapItinBody');
-      const title   = document.getElementById('tapItinTitle');
-      const sub     = document.getElementById('tapItinSub');
+        const card    = document.getElementById('tapItinCard');
+        const body    = document.getElementById('tapItinBody');
+        const title   = document.getElementById('tapItinTitle');
+        const sub     = document.getElementById('tapItinSub');
 
-      if (title) title.textContent = `${this.prefs.duration||5}-Day ${this.trip.destination||'Trip'} Itinerary`;
-      if (sub)   sub.textContent   = `Personalised for ${this.prefs.purpose||'your trip'} · GlobeMate AI`;
-      if (body)  body.innerHTML    = html;
-      if (card)  card.style.display = 'block';
+        if (title) title.textContent = `${this.prefs.duration||5}-Day ${this.trip.destination||'Trip'} Itinerary`;
+        if (sub)   sub.textContent   = `Personalised for ${this.prefs.purpose||'your trip'} · GlobeMate AI`;
+        if (body)  body.innerHTML    = html;
+        if (card)  card.style.display = 'block';
 
-      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      this.addMsg('ai', `✅ Your <strong>${this.prefs.duration||5}-day ${this.trip.destination||''} itinerary</strong> is ready with a full ₹ budget breakdown! 🎉\n\nScroll down to explore it. Use <strong>Save</strong> to store it, <strong>Print</strong> for a PDF, or <strong>Restart</strong> to adjust anything.`);
+        this.addMsg('ai', `✅ Your <strong>${this.prefs.duration||5}-day ${this.trip.destination||''} itinerary</strong> is ready with a full ₹ budget breakdown! 🎉\n\nScroll down to explore it. Use <strong>Save</strong> to store it, <strong>Print</strong> for a PDF, or <strong>Restart</strong> to adjust anything.`);
+      } catch (err) {
+        console.error('GlobeMate AI — itinerary generation error:', err);
+        this.addMsg('ai', `⚠️ Oops! Something went wrong while generating your itinerary. Please click <strong>Restart</strong> and try again.`);
+      }
     },
 
     /* ── Save ── */
@@ -1258,6 +2008,20 @@
   .tap-tips-ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
   .tap-tips-ul li{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:7px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px}
   .tap-tips-ul li i{color:#f59e0b;margin-top:1px}
+  .tap-slot-items{display:flex;flex-direction:column;gap:4px}
+  .tap-slot-item{display:flex;align-items:flex-start;gap:6px;font-size:11px;color:#0f172a;padding:2px 0}
+  .tap-slot-item i{color:#7c3aed;font-size:9px;margin-top:3px}
+  .tap-day-options{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .tap-option{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#f8fafc}
+  .tap-option-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(124,58,237,.05);border-bottom:1px solid #e2e8f0;font-weight:700;font-size:11px;color:#1e1b4b}
+  .tap-option-emoji{font-size:14px}
+  .tap-option-items{padding:8px 12px;display:flex;flex-direction:column;gap:4px}
+  .tap-option-divider{text-align:center;font-size:10px;font-weight:700;color:#94a3b8;padding:2px 0}
+  .tap-route-card{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .tap-route-title{font-weight:700;font-size:12px;color:#1e40af;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .tap-route-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+  .tap-route-item{display:flex;align-items:flex-start;gap:7px;padding:7px 10px;border-radius:7px;background:#fff;border:1px solid #e2e8f0;font-size:10px}
+  .tap-route-item i{color:#3b82f6;margin-top:1px}
   @media print{body{padding:0 8px}}
 </style>
 </head><body>
