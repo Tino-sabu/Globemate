@@ -82,13 +82,13 @@
       localStorage.setItem('globemate_trip_destination', JSON.stringify(destination));
 
       if (typeof showToast === 'function') {
-        showToast(`${country.name.common} fixed as destination! Redirecting to Trip Planner...`, 'success');
+        showToast(`${country.name.common} fixed as destination! Opening weather insights...`, 'success');
       }
 
-      // Navigate to trip planner
+      // Navigate to weather page before trip planner
       setTimeout(() => {
         if (typeof PageLoader !== 'undefined') {
-          PageLoader.loadPage('trip-planner');
+          PageLoader.loadPage('weather-info');
         }
       }, 800);
     },

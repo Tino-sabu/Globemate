@@ -280,10 +280,10 @@ const MapExplorer = (() => {
         currentCity: cityName
       }));
 
-      showToast(`${destination.name} set as destination${cityName ? ` (${cityName})` : ''}!`, 'success');
+      showToast(`${destination.name} set as destination${cityName ? ` (${cityName})` : ''}! Opening weather insights...`, 'success');
 
       if (typeof PageLoader !== 'undefined') {
-        PageLoader.loadPage('trip-planner');
+        PageLoader.loadPage('weather-info');
       }
     } catch (error) {
       console.error('Set destination error:', error);
