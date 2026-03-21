@@ -1,9 +1,0 @@
-{
-  "name": "globemate",
-  "version": "1.0.0",
-  "description": "An intelligent, all-in-one travel planning platform.",
-  "private": true,
-  "scripts": {
-    "build": "node generate-config.js"
-  }
-}

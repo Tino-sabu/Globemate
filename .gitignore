@@ -1,6 +1,5 @@
 # Local secrets/config
 js/config.local.js
-js/config.generated.js
 .env
 .env.*
 
