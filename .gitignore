@@ -1,0 +1,8 @@
+# Local secrets/config
+js/config.local.js
+.env
+.env.*
+
+# OS / Editor
+.DS_Store
+Thumbs.db

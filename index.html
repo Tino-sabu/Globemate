@@ -92,19 +92,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-  <!-- Firebase Configuration -->
-  <script>
-    window.FIREBASE_CONFIG = {
-      apiKey: "AIzaSyCirIpD00mQImLtL_495iDiZFoezJ4K0a8",
-      authDomain: "globemate-1e954.firebaseapp.com",
-      projectId: "globemate-1e954",
-      storageBucket: "globemate-1e954.firebasestorage.app",
-      messagingSenderId: "898372759488",
-      appId: "1:898372759488:web:98f35305049f8f2aa56225",
-      measurementId: "G-5LMLEVTRXE"
-    };
-  </script>
+  <!-- Public-safe config defaults + local private overrides (git-ignored) -->
+  <script src="js/config.js"></script>
+  <script src="js/config.local.js"></script>
   
   <!-- Core App (utilities must load first) -->
   <script src="js/app.js"></script>

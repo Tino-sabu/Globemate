@@ -1654,6 +1654,7 @@
     generatedHTML: '',
     pendingViewedItinerary: null,
     cdTimer: null,
+    followUpMode: false,
 
     init() {
       injectStyles();
@@ -1871,6 +1872,7 @@
       this.step   = 0;
       this.chosen = [];
       this.generatedHTML = '';
+      this.followUpMode = false;
 
       document.getElementById('tapMsgs').innerHTML = '';
       document.getElementById('tapCountdown').style.display = 'none';
@@ -1903,7 +1905,11 @@
       if (messages) messages.innerHTML = '';
       if (countdown) countdown.style.display = 'none';
       if (chipsArea) chipsArea.style.display = 'none';
-      if (inputRow) inputRow.style.display = 'none';
+      if (inputRow) {
+        inputRow.style.display = 'flex';
+        const txt = document.getElementById('tapTxt');
+        if (txt) txt.placeholder = 'Ask anything about your itinerary...';
+      }
 
       ['purpose','duration','accommodation','travelers','interests','dietary'].forEach((key) => {
         const valueEl = document.getElementById(`val-${key}`);
@@ -1919,8 +1925,10 @@
       if (sub) sub.textContent = `Personalised for ${this.prefs.purpose || 'your trip'} · GlobeMate AI`;
       if (body) body.innerHTML = this.generatedHTML;
       if (card) card.style.display = this.generatedHTML ? 'block' : 'none';
+      this.followUpMode = Boolean(this.generatedHTML);
 
       this.addMsg('ai', `✅ Loaded your saved itinerary for <strong>${this.trip.destination || 'your destination'}</strong>. Click <strong>Restart</strong> if you want to regenerate it.`);
+      this.addMsg('ai', 'You can also ask follow-up questions about this trip plan and destination.');
     },
 
     runStep(idx) {
@@ -1974,14 +1982,103 @@
       }
     },
 
-    handleInput() {
+    async handleInput() {
       const txt = document.getElementById('tapTxt');
       if (!txt || !txt.value.trim()) return;
       const s = STEPS[this.step];
-      if (!s) return;
       const val = txt.value.trim();
       txt.value = '';
+
+      if (!s && this.followUpMode) {
+        await this.handleFollowUpQuestion(val);
+        return;
+      }
+
+      if (!s) return;
       this.processAnswer(s, val);
+    },
+
+    escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
+
+    getGroqKey() {
+      return (window.GROQ_API_KEY || '').trim();
+    },
+
+    parseGroqText(data) {
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content === 'string' && content.trim()) return content.trim();
+      return null;
+    },
+
+    async askGroqFollowUp(question) {
+      const groqKey = this.getGroqKey();
+      if (!groqKey) return null;
+
+      const context = {
+        trip: {
+          destination: this.trip.destination || '',
+          tripDate: this.trip.tripDate || '',
+          departureCity: this.trip.departureCity || '',
+          travelMode: this.trip.travelMode || '',
+          passengers: this.trip.passengers || ''
+        },
+        preferences: this.prefs || {}
+      };
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${groqKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: 'You are GlobeMate AI itinerary assistant. Answer trip follow-up questions clearly and practically. Keep replies under 120 words.' },
+            { role: 'user', content: `Trip context: ${JSON.stringify(context)}` },
+            { role: 'user', content: question }
+          ],
+          temperature: 0.4,
+          max_tokens: 260
+        })
+      });
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => '');
+        throw new Error(`Groq request failed: ${response.status} ${detail}`);
+      }
+
+      const data = await response.json();
+      return this.parseGroqText(data);
+    },
+
+    async handleFollowUpQuestion(question) {
+      this.addMsg('user', question);
+      this.showTyping();
+
+      try {
+        const answer = await this.askGroqFollowUp(question);
+        this.hideTyping();
+        if (answer) {
+          this.addMsg('ai', this.escapeHtml(answer));
+          return;
+        }
+      } catch (error) {
+        this.hideTyping();
+        console.warn('Trip follow-up Groq request failed:', error);
+        this.addMsg('ai', `I could not reach Groq right now (${this.escapeHtml(error.message || 'request failed')}). Try again in a moment.`);
+        return;
+      }
+
+      this.hideTyping();
+      this.addMsg('ai', 'Groq key is not configured for follow-up Q&A. Please set window.GROQ_API_KEY in your local config.');
     },
 
     processAnswer(s, answer) {
@@ -2048,10 +2145,19 @@
         if (sub)   sub.textContent   = `Personalised for ${this.prefs.purpose||'your trip'} · GlobeMate AI`;
         if (body)  body.innerHTML    = html;
         if (card)  card.style.display = 'block';
+        this.followUpMode = true;
+
+        const inputRow = document.getElementById('tapInputRow');
+        const input = document.getElementById('tapTxt');
+        if (inputRow) inputRow.style.display = 'flex';
+        if (input) input.placeholder = 'Ask follow-up questions about this itinerary...';
+        const chipsArea = document.getElementById('tapChipsArea');
+        if (chipsArea) chipsArea.style.display = 'none';
 
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         this.addMsg('ai', `✅ Your <strong>${this.prefs.duration||5}-day ${this.trip.destination||''} itinerary</strong> is ready with a full ₹ budget breakdown! 🎉\n\nScroll down to explore it. Use <strong>Save</strong> to store it, <strong>Print</strong> for a PDF, or <strong>Restart</strong> to adjust anything.`);
+        this.addMsg('ai', 'Ask me anything else about your plan, transport, costs, or local tips.');
       } catch (err) {
         console.error('GlobeMate AI — itinerary generation error:', err);
         this.addMsg('ai', `⚠️ Oops! Something went wrong while generating your itinerary. Please click <strong>Restart</strong> and try again.`);

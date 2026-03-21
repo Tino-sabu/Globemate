@@ -3107,6 +3107,32 @@ body.hero-page .btn-outline:hover {
   background: #fef2f2;
 }
 
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-item .btn-open {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.doc-item .btn-open:hover:not(:disabled) {
+  color: var(--primary-dark);
+  background: #eff6ff;
+}
+
+.doc-item .btn-open:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .reminder-item {
   display: flex;
   align-items: center;
