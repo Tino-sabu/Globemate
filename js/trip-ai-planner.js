@@ -1663,11 +1663,17 @@
     cdTimer: null,
     followUpMode: false,
 
-    init() {
+    async init() {
       injectStyles();
 
       const root = document.getElementById('trip-ai-planner-root');
       if (!root) return;
+
+      if (typeof GlobeMateStore !== 'undefined' && typeof GlobeMateStore.syncFromCloud === 'function') {
+        await GlobeMateStore.syncFromCloud().catch((error) => {
+          console.warn('Trip AI planner cloud sync failed:', error);
+        });
+      }
 
       this.pendingViewedItinerary = (typeof GlobeMateStore !== 'undefined')
         ? GlobeMateStore.consumeViewedItinerary()
@@ -1676,13 +1682,14 @@
       if (this.pendingViewedItinerary?.trip) {
         this.trip = this.pendingViewedItinerary.trip;
       } else {
-        const id = (typeof GlobeMateStore !== 'undefined')
-          ? GlobeMateStore.getCurrentTripId()
-          : parseInt(localStorage.getItem('globemate_ai_trip_id'), 10);
-        const trips = (typeof GlobeMateStore !== 'undefined')
-          ? GlobeMateStore.getTrips()
-          : JSON.parse(localStorage.getItem('globemateTrips') || '[]');
-        this.trip = trips.find(t => t.id === id) || trips[trips.length - 1] || {};
+        if (typeof GlobeMateStore === 'undefined') {
+          this.trip = {};
+          console.warn('GlobeMateStore unavailable: trip data cannot be restored right now.');
+        } else {
+          const id = GlobeMateStore.getCurrentTripId();
+          const trips = GlobeMateStore.getTrips();
+          this.trip = trips.find(t => t.id === id) || trips[trips.length - 1] || {};
+        }
       }
 
       root.innerHTML = this.buildHTML();
@@ -2591,9 +2598,11 @@
       if (typeof GlobeMateStore !== 'undefined') {
         GlobeMateStore.saveItinerary(entry);
       } else {
-        const saved = JSON.parse(localStorage.getItem('globemate_saved_itineraries') || '[]');
-        saved.unshift(entry);
-        localStorage.setItem('globemate_saved_itineraries', JSON.stringify(saved));
+        console.warn('GlobeMateStore unavailable: itinerary was not saved to cloud.');
+        if (typeof showToast === 'function') {
+          showToast('Unable to save itinerary right now. Please reload and try again.', 'error');
+        }
+        return;
       }
 
       const btn = document.getElementById('tapSaveBtn');

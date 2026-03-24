@@ -212,35 +212,23 @@
     },
 
     getSavedEntries() {
-      if (typeof GlobeMateStore !== 'undefined') {
-        return GlobeMateStore.getSavedPlaces().map((place) => ({
-          id: place.id,
-          sourceTripId: place.sourceTripId,
-          destination: place.destination || place.trip?.destination || 'Unknown destination',
-          date: place.updatedAt || place.createdAt,
-          duration: place.itinerary?.prefs?.duration || null,
-          travelers: place.itinerary?.prefs?.travelers || place.trip?.passengers || 1,
-          purpose: place.itinerary?.prefs?.purpose || 'Trip Plan',
-          hasItinerary: Boolean(place.itinerary?.html),
-          itinerary: place.itinerary || null,
-          trip: place.trip || null
-        }));
+      if (typeof GlobeMateStore === 'undefined') {
+        console.warn('GlobeMateStore unavailable: saved places cannot be loaded yet.');
+        return [];
       }
 
-      const itineraries = JSON.parse(localStorage.getItem('globemate_saved_itineraries') || '[]').map((item, index) => ({
-        id: item.id || `itin-${index}`,
-        sourceTripId: item.trip?.id || item.id || index,
-        destination: item.destination || 'Unknown destination',
-        date: item.date,
-        duration: item.prefs?.duration,
-        travelers: item.prefs?.travelers,
-        purpose: item.prefs?.purpose,
-        hasItinerary: Boolean(item.html),
-        itinerary: item,
-        trip: item.trip || null
+      return GlobeMateStore.getSavedPlaces().map((place) => ({
+        id: place.id,
+        sourceTripId: place.sourceTripId,
+        destination: place.destination || place.trip?.destination || 'Unknown destination',
+        date: place.updatedAt || place.createdAt,
+        duration: place.itinerary?.prefs?.duration || null,
+        travelers: place.itinerary?.prefs?.travelers || place.trip?.passengers || 1,
+        purpose: place.itinerary?.prefs?.purpose || 'Trip Plan',
+        hasItinerary: Boolean(place.itinerary?.html),
+        itinerary: place.itinerary || null,
+        trip: place.trip || null
       }));
-
-      return itineraries.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
     },
 
     formatDate(dateVal) {
@@ -382,8 +370,12 @@
       if (!item) return;
       
       if (item.hasItinerary && item.itinerary) {
-        if (typeof GlobeMateStore !== 'undefined') GlobeMateStore.setViewedItinerary(item.itinerary);
-        else localStorage.setItem('globemate_view_itinerary', JSON.stringify(item.itinerary));
+        if (typeof GlobeMateStore === 'undefined') {
+          if (typeof showToast === 'function') showToast('Saved data is not ready. Please reload and try again.', 'error');
+          return;
+        }
+
+        GlobeMateStore.setViewedItinerary(item.itinerary);
         if (typeof PageLoader !== 'undefined') {
           PageLoader.loadPage('trip-ai-planner');
         }
@@ -392,8 +384,12 @@
 
       if (item.trip?.id || item.sourceTripId) {
         const tripId = item.trip?.id || item.sourceTripId;
-        if (typeof GlobeMateStore !== 'undefined') GlobeMateStore.setCurrentTripId(tripId);
-        else localStorage.setItem('globemate_ai_trip_id', String(tripId));
+        if (typeof GlobeMateStore === 'undefined') {
+          if (typeof showToast === 'function') showToast('Saved data is not ready. Please reload and try again.', 'error');
+          return;
+        }
+
+        GlobeMateStore.setCurrentTripId(tripId);
         if (typeof PageLoader !== 'undefined') {
           PageLoader.loadPage('trip-ai-planner');
         }
@@ -411,13 +407,12 @@
 
       if (!confirm(message)) return;
 
-      if (typeof GlobeMateStore !== 'undefined') {
-        GlobeMateStore.deleteSavedPlace(item.id);
-      } else {
-        const legacy = JSON.parse(localStorage.getItem('globemate_saved_itineraries') || '[]');
-        const next = legacy.filter(entry => Number(entry.id) !== Number(item.id));
-        localStorage.setItem('globemate_saved_itineraries', JSON.stringify(next));
+      if (typeof GlobeMateStore === 'undefined') {
+        if (typeof showToast === 'function') showToast('Saved data is not ready. Please reload and try again.', 'error');
+        return;
       }
+
+      GlobeMateStore.deleteSavedPlace(item.id);
 
       this.renderSavedPlaces();
     },

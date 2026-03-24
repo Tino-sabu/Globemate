@@ -903,6 +903,13 @@
         return;
       }
 
+      if (typeof GlobeMateStore === 'undefined') {
+        if (typeof showToast === 'function') {
+          showToast('Trip storage is temporarily unavailable. Please reload and try again.', 'error');
+        }
+        return;
+      }
+
       const hostCountry = document.getElementById('tripHostCountry')?.value || '';
       const currentCity = document.getElementById('tripCurrentLocation')?.value || '';
       const tripDate = document.getElementById('tripDate')?.value || '';
@@ -923,13 +930,8 @@
         createdAt: new Date().toISOString()
       };
 
-      if (typeof GlobeMateStore !== 'undefined') {
-        GlobeMateStore.saveTrip(trip);
-        this.trips = GlobeMateStore.getTrips();
-      } else {
-        this.trips.push(trip);
-        localStorage.setItem('globemateTrips', JSON.stringify(this.trips));
-      }
+      GlobeMateStore.saveTrip(trip);
+      this.trips = GlobeMateStore.getTrips();
       this.renderSavedTrips();
       if (typeof showToast === 'function') showToast('Trip saved successfully!', 'success');
     },
@@ -946,19 +948,13 @@
     },
 
     loadTrips() {
-      if (typeof GlobeMateStore !== 'undefined') {
-        this.trips = GlobeMateStore.getTrips();
+      if (typeof GlobeMateStore === 'undefined') {
+        this.trips = [];
+        console.warn('GlobeMateStore unavailable: trip list is empty until store is ready.');
         return;
       }
 
-      const saved = localStorage.getItem('globemateTrips');
-      if (!saved) return;
-
-      try {
-        this.trips = JSON.parse(saved);
-      } catch(e) {
-        this.trips = [];
-      }
+      this.trips = GlobeMateStore.getTrips();
     },
 
     renderSavedTrips() {
@@ -1017,8 +1013,15 @@
         const handler = (e) => {
           if (e.target.closest('.saved-trip-actions')) return;
           const id = parseInt(item.dataset.tripId);
-          if (typeof GlobeMateStore !== 'undefined') GlobeMateStore.setCurrentTripId(id);
-          else localStorage.setItem('globemate_ai_trip_id', id);
+
+          if (typeof GlobeMateStore === 'undefined') {
+            if (typeof showToast === 'function') {
+              showToast('Trip storage is temporarily unavailable. Please reload and try again.', 'error');
+            }
+            return;
+          }
+
+          GlobeMateStore.setCurrentTripId(id);
           if (typeof PageLoader !== 'undefined') {
             PageLoader.loadPage('trip-ai-planner');
           }
@@ -1075,13 +1078,15 @@
     },
 
     deleteTrip(id) {
-      if (typeof GlobeMateStore !== 'undefined') {
-        GlobeMateStore.deleteTrip(id);
-        this.trips = GlobeMateStore.getTrips();
-      } else {
-        this.trips = this.trips.filter(t => t.id !== id);
-        localStorage.setItem('globemateTrips', JSON.stringify(this.trips));
+      if (typeof GlobeMateStore === 'undefined') {
+        if (typeof showToast === 'function') {
+          showToast('Trip storage is temporarily unavailable. Please reload and try again.', 'error');
+        }
+        return;
       }
+
+      GlobeMateStore.deleteTrip(id);
+      this.trips = GlobeMateStore.getTrips();
       this.renderSavedTrips();
       if (typeof showToast === 'function') showToast('Trip deleted.', 'success');
     },

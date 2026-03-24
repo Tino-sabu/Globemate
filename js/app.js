@@ -201,6 +201,21 @@ const GlobeMateStore = (() => {
     return sortByRecent(Array.from(map.values()));
   }
 
+  function placesEqual(a = [], b = []) {
+    const normalizeForCompare = (items) => sortByRecent(items).map((place) => ({
+      id: place.id,
+      sourceTripId: Number(place.sourceTripId),
+      destination: place.destination,
+      createdAt: place.createdAt,
+      updatedAt: place.updatedAt,
+      trip: place.trip,
+      itinerary: place.itinerary
+    }));
+
+    return JSON.stringify(normalizeForCompare(a.map(normalizePlace)))
+      === JSON.stringify(normalizeForCompare(b.map(normalizePlace)));
+  }
+
   async function pushPlacesToCloud(places) {
     const uid = currentUserId();
     const db = currentDB();
@@ -219,10 +234,21 @@ const GlobeMateStore = (() => {
     if (!uid) return;
 
     if (cloudPushTimer) clearTimeout(cloudPushTimer);
-    cloudPushTimer = setTimeout(() => {
-      pushPlacesToCloud(places).catch((error) => {
+    cloudPushTimer = setTimeout(async () => {
+      try {
+        // Never push before first pull; this avoids clobbering existing cloud data.
+        if (cloudSyncedUserId !== uid) {
+          await syncFromCloud();
+        }
+
+        const latestPlaces = readArray(KEYS.savedPlaces).map(normalizePlace);
+        await pushPlacesToCloud(latestPlaces);
+        cloudSyncedUserId = uid;
+      } catch (error) {
         console.warn('Cloud sync push failed:', error);
-      });
+      } finally {
+        cloudPushTimer = null;
+      }
     }, 450);
   }
 
@@ -248,6 +274,12 @@ const GlobeMateStore = (() => {
       }
 
       cloudSyncedUserId = uid;
+
+      // Keep cloud in sync with merged result (legacy local data + cloud data).
+      if (!placesEqual(merged, cloudPlaces)) {
+        await pushPlacesToCloud(merged);
+      }
+
       return merged;
     })();
 

@@ -60,6 +60,15 @@ const Auth = (() => {
     });
   }
 
+  async function syncUserStoreAfterAuth() {
+    if (!window.GlobeMateStore || typeof window.GlobeMateStore.syncFromCloud !== 'function') return;
+    try {
+      await window.GlobeMateStore.syncFromCloud();
+    } catch (error) {
+      console.warn('Post-auth saved data sync failed:', error);
+    }
+  }
+
   // Sign up new user
   async function signUp(name, email, password) {
     const auth = getAuth();
@@ -82,6 +91,7 @@ const Auth = (() => {
           created_at: new Date().toISOString()
         }).catch(console.warn);
       }
+      await syncUserStoreAfterAuth();
       return { success: true, user: credential.user };
     } catch (e) {
       console.error('SignUp error:', e);
@@ -97,6 +107,7 @@ const Auth = (() => {
     try {
       const credential = await auth.signInWithEmailAndPassword(email, password);
       currentUser = credential.user;
+      await syncUserStoreAfterAuth();
       return { success: true, user: credential.user };
     } catch (e) {
       console.error('Login error:', e);
@@ -124,6 +135,7 @@ const Auth = (() => {
           created_at: new Date().toISOString()
         }, { merge: true }).catch(console.warn);
       }
+      await syncUserStoreAfterAuth();
       return { success: true, user: credential.user };
     } catch (e) {
       console.error('Google sign-in error:', e);
