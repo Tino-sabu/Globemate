@@ -74,6 +74,14 @@
         });
       }
 
+      const forgotPasswordLink = document.querySelector('.forgot-password');
+      if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          showToast('The beta version does not support Gmail verifcation, we will introduce it soon.', 'info');
+        });
+      }
+
       console.log('✅ Login form ready');
     },
 

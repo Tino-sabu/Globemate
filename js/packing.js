@@ -183,6 +183,16 @@
 
       this.saveList();
       this.renderList();
+
+      if (typeof showToast === 'function') {
+        showToast('Packing list generated. Redirecting to Saved Places...', 'success');
+      }
+
+      setTimeout(() => {
+        if (typeof PageLoader !== 'undefined' && typeof PageLoader.loadPage === 'function') {
+          PageLoader.loadPage('saved-places');
+        }
+      }, 900);
     },
 
     adjustForDuration(items, duration, travelers = 1) {

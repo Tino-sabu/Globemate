@@ -12,8 +12,13 @@ const Auth = (() => {
         return false;
       }
       const config = window.FIREBASE_CONFIG;
-      if (!config || !config.apiKey) {
-        console.error('Firebase credentials not configured');
+      if (!config || !config.apiKey || config.apiKey === 'YOUR_API_KEY') {
+        console.error('Firebase credentials not configured. Set Vercel PUBLIC_FIREBASE_* env vars or localStorage key globemate.firebaseConfig.');
+        return false;
+      }
+
+      if (!config.authDomain || !config.projectId || !config.appId) {
+        console.error('Firebase config incomplete. Ensure apiKey, authDomain, projectId, and appId are set.');
         return false;
       }
       if (!firebase.apps.length) {
@@ -171,7 +176,8 @@ const Auth = (() => {
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/network-request-failed': 'Network error. Check your connection.',
       'auth/popup-closed-by-user': 'Sign-in popup was closed.',
-      'auth/cancelled-popup-request': 'Sign-in popup was cancelled.'
+      'auth/cancelled-popup-request': 'Sign-in popup was cancelled.',
+      'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Firebase API key is invalid. Use the Web API key from Firebase Project Settings > General > Your apps.'
     };
     return map[e.code] || e.message;
   }
@@ -212,7 +218,6 @@ const Auth = (() => {
 
     setNavItemVisibility('trip-planner', true);
     setNavItemVisibility('packing', true);
-    setNavItemVisibility('documents', true);
 
     // Add Logout nav item
     const navLinks = document.getElementById('navLinks');
@@ -266,7 +271,6 @@ const Auth = (() => {
 
     setNavItemVisibility('trip-planner', false);
     setNavItemVisibility('packing', false);
-    setNavItemVisibility('documents', false);
 
     // Remove logout item
     const logoutLi = document.getElementById('logoutNavItem');

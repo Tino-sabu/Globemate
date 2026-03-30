@@ -12,6 +12,13 @@ module.exports = (req, res) => {
     measurementId: process.env.PUBLIC_FIREBASE_MEASUREMENT_ID || ''
   };
 
+  const emailJsConfig = {
+    serviceId: process.env.PUBLIC_EMAILJS_SERVICE_ID || '',
+    templateId: process.env.PUBLIC_EMAILJS_TEMPLATE_ID || '',
+    resetTemplateId: process.env.PUBLIC_EMAILJS_RESET_TEMPLATE_ID || '',
+    publicKey: process.env.PUBLIC_EMAILJS_PUBLIC_KEY || ''
+  };
+
   const js = `
 (function () {
   window.FIREBASE_CONFIG = {
@@ -22,6 +29,13 @@ module.exports = (req, res) => {
     messagingSenderId: ${JSON.stringify(firebaseConfig.messagingSenderId)},
     appId: ${JSON.stringify(firebaseConfig.appId)},
     measurementId: ${JSON.stringify(firebaseConfig.measurementId)}
+  };
+
+  window.EMAILJS_CONFIG = {
+    serviceId: ${JSON.stringify(emailJsConfig.serviceId)},
+    templateId: ${JSON.stringify(emailJsConfig.templateId)},
+    resetTemplateId: ${JSON.stringify(emailJsConfig.resetTemplateId)},
+    publicKey: ${JSON.stringify(emailJsConfig.publicKey)}
   };
 
   window.TOMORROW_IO_API_KEY = ${JSON.stringify(process.env.PUBLIC_TOMORROW_IO_API_KEY || '')};

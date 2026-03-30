@@ -23,6 +23,13 @@
         return;
       }
 
+      const nameInput = document.getElementById('registerName');
+      if (nameInput) {
+        nameInput.addEventListener('input', () => {
+          nameInput.value = nameInput.value.replace(/[^A-Za-z\s]/g, '');
+        });
+      }
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -34,6 +41,11 @@
         // Validation
         if (!name) {
           showToast('Please enter your full name', 'error');
+          return;
+        }
+
+        if (!/^[A-Za-z\s]+$/.test(name)) {
+          showToast('Name should contain only alphabets', 'error');
           return;
         }
 
