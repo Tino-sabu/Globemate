@@ -51,6 +51,13 @@
           this.generateList();
         });
       }
+
+      const saveMoveBtn = document.getElementById('packSaveMoveBtn');
+      if (saveMoveBtn) {
+        saveMoveBtn.addEventListener('click', () => {
+          this.saveAndMoveToSavedPlaces();
+        });
+      }
     },
 
     loadPrefillData() {
@@ -185,14 +192,10 @@
       this.renderList();
 
       if (typeof showToast === 'function') {
-        showToast('Packing list generated. Redirecting to Saved Places...', 'success');
+        showToast('Packing list generated. Click Save Packing List to continue.', 'success');
       }
 
-      setTimeout(() => {
-        if (typeof PageLoader !== 'undefined' && typeof PageLoader.loadPage === 'function') {
-          PageLoader.loadPage('saved-places');
-        }
-      }, 900);
+      this.updateSaveMoveButtonVisibility();
     },
 
     adjustForDuration(items, duration, travelers = 1) {
@@ -236,6 +239,7 @@
             <p>Configure your trip and generate a packing list</p>
           </div>
         `;
+        this.updateSaveMoveButtonVisibility();
         return;
       }
 
@@ -265,6 +269,7 @@
       `).join('');
 
       this.updateProgress();
+      this.updateSaveMoveButtonVisibility();
     },
 
     toggleItem(id) {
@@ -295,6 +300,30 @@
 
     saveList() {
       localStorage.setItem('globematePackingList', JSON.stringify(this.items));
+    },
+
+    updateSaveMoveButtonVisibility() {
+      const saveMoveBtn = document.getElementById('packSaveMoveBtn');
+      if (!saveMoveBtn) return;
+      saveMoveBtn.style.display = this.items.length > 0 ? 'inline-flex' : 'none';
+    },
+
+    saveAndMoveToSavedPlaces() {
+      if (!this.items.length) {
+        if (typeof showToast === 'function') {
+          showToast('Generate your packing list first.', 'warning');
+        }
+        return;
+      }
+
+      this.saveList();
+      if (typeof showToast === 'function') {
+        showToast('Packing list saved. Opening Saved Places...', 'success');
+      }
+
+      if (typeof PageLoader !== 'undefined' && typeof PageLoader.loadPage === 'function') {
+        setTimeout(() => PageLoader.loadPage('saved-places'), 500);
+      }
     },
 
     cleanup() {

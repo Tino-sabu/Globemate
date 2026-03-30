@@ -34,7 +34,7 @@
         e.preventDefault();
 
         const name = document.getElementById('registerName').value.trim();
-        const email = document.getElementById('registerEmail').value.trim();
+        const email = document.getElementById('registerEmail').value.trim().toLowerCase();
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('registerConfirmPassword').value;
 
@@ -46,6 +46,11 @@
 
         if (!/^[A-Za-z\s]+$/.test(name)) {
           showToast('Name should contain only alphabets', 'error');
+          return;
+        }
+
+        if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+          showToast('Only @gmail.com email addresses are allowed', 'error');
           return;
         }
 
