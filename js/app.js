@@ -60,12 +60,37 @@ const GlobeMateStore = (() => {
     }
   }
 
-  function readArray(key) {
-    return safeParseArray(localStorage.getItem(key));
+  function scopedStoreKey(baseKey) {
+    const uid = currentUserId();
+    return uid ? `${baseKey}__${uid}` : `${baseKey}__guest`;
+  }
+
+  function readArray(key, options = {}) {
+    const scopedKey = scopedStoreKey(key);
+    const scopedValue = localStorage.getItem(scopedKey);
+
+    if (scopedValue) {
+      return safeParseArray(scopedValue);
+    }
+
+    // Migrate anonymous/guest legacy data only. Never read legacy shared keys for signed-in users.
+    if (!currentUserId() && options.allowGuestLegacy) {
+      const legacyValue = localStorage.getItem(key);
+      const legacyParsed = safeParseArray(legacyValue);
+      if (legacyParsed.length) {
+        localStorage.setItem(scopedKey, JSON.stringify(legacyParsed));
+      }
+      if (legacyValue !== null) {
+        localStorage.removeItem(key);
+      }
+      return legacyParsed;
+    }
+
+    return [];
   }
 
   function writeArray(key, value) {
-    localStorage.setItem(key, JSON.stringify(Array.isArray(value) ? value : []));
+    localStorage.setItem(scopedStoreKey(key), JSON.stringify(Array.isArray(value) ? value : []));
   }
 
   function nowIso() {
@@ -330,13 +355,13 @@ const GlobeMateStore = (() => {
   }
 
   function migrateLegacyIfNeeded() {
-    const existing = readArray(KEYS.savedPlaces).map(normalizePlace);
+    const existing = readArray(KEYS.savedPlaces, { allowGuestLegacy: true }).map(normalizePlace);
     if (existing.length) return sortByRecent(existing);
 
-    const tripPlaces = readArray(KEYS.trips).map(placeFromTrip);
+    const tripPlaces = readArray(KEYS.trips, { allowGuestLegacy: true }).map(placeFromTrip);
     const merged = [...tripPlaces];
 
-    readArray(KEYS.itineraries)
+    readArray(KEYS.itineraries, { allowGuestLegacy: true })
       .map(normalizeItinerary)
       .forEach((entry) => {
         const index = merged.findIndex(place => Number(place.sourceTripId) === Number(entry.trip.id));
@@ -464,21 +489,22 @@ const GlobeMateStore = (() => {
   }
 
   function setCurrentTripId(tripId) {
-    localStorage.setItem(KEYS.aiTripId, String(tripId));
+    localStorage.setItem(scopedStoreKey(KEYS.aiTripId), String(tripId));
   }
 
   function getCurrentTripId() {
-    const value = parseInt(localStorage.getItem(KEYS.aiTripId), 10);
+    const value = parseInt(localStorage.getItem(scopedStoreKey(KEYS.aiTripId)), 10);
     return Number.isNaN(value) ? null : value;
   }
 
   function setViewedItinerary(itinerary) {
-    localStorage.setItem(KEYS.viewItinerary, JSON.stringify(itinerary || null));
+    localStorage.setItem(scopedStoreKey(KEYS.viewItinerary), JSON.stringify(itinerary || null));
   }
 
   function consumeViewedItinerary() {
-    const raw = localStorage.getItem(KEYS.viewItinerary);
-    localStorage.removeItem(KEYS.viewItinerary);
+    const key = scopedStoreKey(KEYS.viewItinerary);
+    const raw = localStorage.getItem(key);
+    localStorage.removeItem(key);
     if (!raw || raw === 'null') return null;
     try {
       return JSON.parse(raw);
